@@ -87,7 +87,5 @@ public class Lister {
 
         // 转换列表为数组并返回
         return ancestorsList.toArray(new Ancestor[0]);
-
-
     }
 }
