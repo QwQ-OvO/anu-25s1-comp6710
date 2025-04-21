@@ -2,6 +2,7 @@ package p3;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class Lister {
 
@@ -64,9 +65,28 @@ public class Lister {
     }
 
     static Ancestor[] getAncestors(File directory) {
+        // 参数验证：确保目录存在且真的是目录
         if (!directory.exists() || !directory.isDirectory()) {
             return new Ancestor[0];
         }
+        ArrayList<Ancestor> ancestorsList = new ArrayList<>();
+
+        // 获取当前目录的父目录
+        File parent = directory.getParentFile();
+
+        // 遍历所有父目录直到根目录
+        while (parent != null) {
+            // 创建新的祖先对象并添加到列表
+            ancestorsList.add(new Ancestor(parent));
+            // 移动到下一个父目录
+            parent = parent.getParentFile();
+        }
+
+        // 按照到根目录的距离排序
+        ancestorsList.sort(Comparator.comparingInt(Ancestor::distance));
+
+        // 转换列表为数组并返回
+        return ancestorsList.toArray(new Ancestor[0]);
 
 
     }
