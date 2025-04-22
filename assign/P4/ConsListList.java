@@ -35,6 +35,19 @@ public class ConsListList<T> implements List<T> {
 
     @Override
     public boolean contains(Object o) {
+        if (size == 0) {
+            return false;
+        }
+        if (Objects.equals(o, first.value)) {
+            return true;
+        }
+        Node<T> currentNode = first;
+        while (currentNode.next != null) {
+            if (Objects.equals(o, currentNode.next.value)) {
+                return true;
+            }
+            currentNode = currentNode.next;
+        }
         return false;
     }
 
@@ -147,11 +160,7 @@ public class ConsListList<T> implements List<T> {
         if (index < 0 || index >= size) {
             throw  new IndexOutOfBoundsException();
         }
-        if (index == 0) {
-            T previousFirstValue = first.value;
-            first.value = element;
-            return previousFirstValue;
-        }
+
         Node<T> currentNode = first;
         for (int i = 0; i < index; i++) {
             currentNode = currentNode.next;
