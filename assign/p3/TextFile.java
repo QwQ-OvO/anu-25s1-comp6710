@@ -14,7 +14,10 @@ public class TextFile {
     private File file;
     /** 存储文件的所有行 */
     private ArrayList<String> lines;
-    /** 存储每行的单词列表，外层列表的每个元素对应文件的一行 */
+    /**
+     * 存储每行的单词列表，外层列表的每个元素对应文件的一行
+     * 嵌套列表用于保持文件的二维结构（行和单词）
+     */
     private ArrayList<ArrayList<String>> wordInLines;
     /** 存储单词及其出现次数的映射关系 */
     private Map<String, Integer> wordCounts;
@@ -52,24 +55,40 @@ public class TextFile {
                 // 当到达文件末尾时返回 null
                 // 括号确保先执行赋值，再进行 null 比较
                 while ((line = reader.readLine()) != null) {
+                    // 将当前行添加到行列表中
                     lines.add(line);
 
+                    // 使用正则表达式 " +" 分割行文本
+                    // 该正则匹配一个或多个连续空格，处理连续空格情况
                     String[] wordsArray = line.split(" +");
+
+                    // 创建用于存储当前行单词的列表
                     ArrayList<String> lineWords = new ArrayList<>();
 
+                    // 遍历当前行中的所有单词
                     for (String word : wordsArray) {
+                        // 跳过空单词
                         if (!word.isEmpty()) {
+                            // 将单词添加到当前行的单词列表
                             lineWords.add(word);
+                            // 将单词添加到全局单词列表，保持文件中的顺序
                             allWords.add(word);
+                            // 更新单词计数映射
+                            // getOrDefault 获取单词当前计数，如果不存在则返回默认值 0
+                            // 然后计数加 1 并存回映射
                             wordCounts.put(word, wordCounts.getOrDefault(word, 0) + 1);
                         }
                     }
-
+                    // 将处理完的当前行单词列表添加到嵌套列表中
                     wordInLines.add(lineWords);
                 }
-            }
+            } // 此处 BufferedReader 自动关闭
         }
+        // 捕获可能的 IOException（受检异常）
         catch (IOException e) {
+            // 将受检异常转换为非受检异常 RuntimeException
+            // 同时保留原始异常信息和堆栈跟踪
+            // 添加文件路径信息以便更好地诊断问题
             throw new RuntimeException("Error reading file: " + file.getPath(), e);
         }
     }
