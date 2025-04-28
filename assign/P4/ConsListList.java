@@ -4,7 +4,6 @@ import java.util.*;
 
 public class ConsListList<T> implements List<T> {
 
-    // 定义Node<T>内部类. 创建基于节点的链表
     public static class Node<T> {
         T value;
         Node<T> next;
