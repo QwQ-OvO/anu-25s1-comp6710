@@ -1,5 +1,5 @@
 import comp1110.lib.*;
-import comp1110.lib.Date;
+
 import static comp1110.lib.Functions.*;
 import static comp1110.testing.Comp1110Unit.*;
 import comp1110.universe.*;
@@ -766,9 +766,9 @@ ClockWorld keyEvent(ClockWorld world, KeyEvent keyEvent){
  * args[3]: alarm message (string) - Message to display when alarm triggers
  * 
  * Examples:
- * java --enable-preview AlarmClock.java 60 10 R "Wake up!"
+ * java --enable-preview ClockAlarm.java 60 10 R "Wake up!"
  *   Creates clock with 60-tick cycle, recurring alarm at tick 10
- * java --enable-preview AlarmClock.java 30 15 O "Meeting time!"
+ * java --enable-preview ClockAlarm.java 30 15 O "Meeting time!"
  *   Creates clock with 30-tick cycle, one-time alarm at tick 15
  * 
  * BigBang parameters:
@@ -799,7 +799,7 @@ void main(String[] args){
     }
     
     // Start the interactive world program
-    // Example: java --enable-preview AlarmClock.java 60 10 Y Alarm
+    // Example: java --enable-preview ClockAlarm.java 60 10 Y Alarm
     BigBang("Alarm Clock", new ClockWorld(clock, AlarmClockState.CLOCK_RUN, FontStyle.PLAIN, 0, 0, ""), this::draw, this::step, this::keyEvent);
 }
 
