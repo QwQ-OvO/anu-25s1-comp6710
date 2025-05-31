@@ -22,7 +22,26 @@ public class Q1Outside {
      * than start, or start if there is no such value outside the range.
      */
     public static int findOutside(int[] in, int start, int end) {
-        return 0; // FIXME complete this method
+        if (start > end) {
+            return end;
+        }
+
+        int minValue = Integer.MAX_VALUE;
+        boolean outside = false;
+
+        for (int value : in) {
+            if (value < start || value > end) {
+                if (value < minValue) {
+                    minValue = value;
+                    outside = true;
+                }
+            }
+        }
+
+        if (!outside) {
+            return start;
+        }
+        return minValue;
     }
 }
 
