@@ -37,10 +37,10 @@ public class Q2ThreeFour {
         int sumDigit = 0;
 
         if (isThreeFourNumber) {
-            sumDigit = SumOddDigit(number);
+            sumDigit = sumOddDigit(number);
         }
         if (!isThreeFourNumber) {
-            sumDigit = SumEvenDigit(number);
+            sumDigit = sumEvenDigit(number);
         }
         return sumDigit;
     }
@@ -66,7 +66,7 @@ public class Q2ThreeFour {
         return isThreeFourNumber(innerNum);
     }
 
-    public static int SumOddDigit(String number) {
+    public static int sumOddDigit(String number) {
 
         int sum = 0;
         for (int i = 0; i < number.length(); i++) {
@@ -79,7 +79,7 @@ public class Q2ThreeFour {
         return sum;
     }
 
-    public static int SumEvenDigit(String number) {
+    public static int sumEvenDigit(String number) {
         int sum = 0;
         for (int i = 0; i < number.length(); i++) {
             char c = number.charAt(i);
