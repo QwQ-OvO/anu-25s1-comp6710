@@ -32,6 +32,13 @@ public class Q2ThreeFour {
             return -1;
         }
 
+//        // 替代正则判断contains any non-digit characters的方法
+//        for (char c : number.toCharArray()) {
+//            if (!Character.isDigit(c)){
+//                return -1;
+//            }
+//        }
+
         boolean isThreeFourNumber = isThreeFourNumber(number);
 
         int sumDigit = 0;
