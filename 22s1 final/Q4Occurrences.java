@@ -48,6 +48,7 @@ public class Q4Occurrences {
             Set<String> textSet = new HashSet<>();
             StringBuilder result = new StringBuilder();
 
+           //readLine()每次调用都会读取下一行，并且移动内部指针
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
                 allContent.append(line);
 
