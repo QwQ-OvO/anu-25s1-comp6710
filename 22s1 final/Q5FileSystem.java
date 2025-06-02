@@ -226,10 +226,7 @@ public class Q5FileSystem {
         if (month1 < month2) {
             return false;
         }
-        if (day1 > day2) {
-            return true;
-        }
-        return false;
+        return day1 > day2;
     }
 
     /**
