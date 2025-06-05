@@ -1,4 +1,4 @@
-package comp1110.exam;
+
 
 import java.io.File;
 import java.util.HashMap;
