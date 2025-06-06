@@ -1,12 +1,18 @@
-package comp1110.exam;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Timeout(value = 500, unit = TimeUnit.MILLISECONDS)
 public class Q5GetMaxUsersTest {
     // FIXME add one or more JUnit tests for the getMaxUsers() method of the Q5FileSystem class
+    private Q5FileSystem fileSystem;
 
     String[] dates = new String[]{
             "10-04-2022",
@@ -59,4 +65,27 @@ public class Q5GetMaxUsersTest {
             "calendar",
             "Recipes"
     };
+
+    @BeforeEach
+    void setUp() {
+        fileSystem = new Q5FileSystem();
+    }
+
+    @Test
+    void testEmptySystem() {
+        assertEquals(0, fileSystem.getMaxUsers(), "should have no user");
+    }
+
+    @Test
+    void testSingleFile() {
+        Set<String> mod = new HashSet<>();
+        mod.add("A");
+        mod.add("B");
+
+        fileSystem.addFile("Test", "C", "2025-06-07", mod);
+
+        assertEquals(3, fileSystem.getMaxUsers(), "total 3 users");
+    }
+
+
 }
