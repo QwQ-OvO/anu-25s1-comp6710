@@ -1,19 +1,19 @@
-## COMP6710 — 25S1 Notes 
+# COMP6710 — 25S1 Notes 
 
 The following comments reflect my personal experience in 25S1
 
-#### Course Snapshot
+### Course Snapshot
 
 - [Course website](https://comp.anu.edu.au/courses/comp1110/)
   
 - 25S1 introduced major changes to both content and assessment.
 
-#### Please Skip the Course If You Can
+### Please Skip the Course If You Can
 
 Experienced programmers can apply for credit transfer via [CSS Course credit & exemption](https://systems.anu.edu.au/students/continuing/credit/)
 Doing so early may spare you a **extremely painful** first semester.
 
-#### About Functional Java
+### About Functional Java
 
 Up until the mid-semester break the teaching is entirely in Functional Java, and Assignments 1 & 2 must be written with it. We will drill recursion heavily and, right at the end, touch on binary trees. 
 
@@ -23,7 +23,7 @@ After the mid-semester the course switches back to regular Java and we will neve
 
 How to juggle writing assignments in “Fava” while privately practising regular Java is something we will have to work out.
 
-#### About Code Walk
+### About Code Walk
 
 This semester, having code that compiles and passes the interface tests is essential for both the mid-semester and final exams, but it is not the main criterion for the weekly assignments. 
 
@@ -33,6 +33,6 @@ This semester, having code that compiles and passes the interface tests is essen
 
 - Treat the code-walk presentation with great seriousness—it will strongly influence your assignment mark.
 
-#### The Marking Scheme
+### The Marking Scheme
 
 This semester the graders will only assess the distinction section of any assignment or exam after the non-distinction section has reached 90 % correctness, and the distinction part is not bonus credit. Be mentally prepared for very low continuous marks. Of course, it would be wonderful if the scheme is revised in the new semester.
