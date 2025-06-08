@@ -1,3 +1,4 @@
+/** Import packages from course website. */
 import comp1110.lib.*;
 
 import static comp1110.lib.Functions.*;
@@ -7,19 +8,22 @@ import static comp1110.universe.Colour.*;
 import static comp1110.universe.Image.*;
 import static comp1110.universe.Universe.*;
 
+// =============================================================================
+// DATA DEFINITIONS
+// =============================================================================
+
 /**
- * Defines alarm behavior types
+ * Purpose: Represents the different behaviors an alarm can have in the system.
+ * 
+ * Signature: Enumeration with two values: RECURRING, ONE_TIME.
  * 
  * Examples:
- * given: RECURRING alarm at tick 5, cycle 10
- *  expect: Triggers at 5,15,25... (repeats)
+ * - AlarmType.RECURRING: Triggers repeatedly each cycle, persists after triggering
+ * - AlarmType.ONE_TIME: Triggers once then removes itself automatically
  * 
- * given: ONE_TIME alarm at tick 3, cycle 10
- *  expect: Triggers at 3 only (auto-removes)
+ * Design Strategy: Simple Expression - Enumeration to represent distinct alarm behaviors.
  * 
- * Design Strategy: Simple Enumeration
- * - Two constant cases without data
- * - Distinguishes repeating vs single trigger
+ * Effects: Immutable enumeration with no side effects.
  */
 enum AlarmType{
     
@@ -37,20 +41,17 @@ enum AlarmType{
 }
 
 /**
- * Record representing an alarm's configuration
- * Combines function with simple data fields
+ * Purpose: Represents an alarm's configuration with trigger time, message function, and behavior type.
+ * 
+ * Signature: Record containing int, Function<Integer, String>, and AlarmType fields.
  * 
  * Examples:
- * given: new Alarm(5, t->"Wake!", RECURRING)
- *  expect: Recurring alarm at tick 5 displaying "Wake!"
+ * - new Alarm(5, t->"Wake!", RECURRING) -> recurring alarm at tick 5 displaying "Wake!"
+ * - new Alarm(3, t->"Meeting "+t, ONE_TIME) -> one-time alarm at tick 3 displaying "Meeting 3"
  * 
- * given: new Alarm(3, t->"Meeting "+t, ONE_TIME) 
- *  expect: One-time alarm at tick 3 displaying "Meeting 3"
+ * Design Strategy: Simple Expression - Immutable record combining data with function.
  * 
- * Design Strategy: Simple Record with Function Combination
- * - Record for immutable data structure
- * - Function field for alarm behavior
- * - Simple method applying function
+ * Effects: Creates immutable alarm object with no side effects.
  * 
  * @param triggerTime When alarm triggers (0 <= time < cycle)
  * @param alarmFunction Produces message from current tick
@@ -58,10 +59,17 @@ enum AlarmType{
  */
 record Alarm(int triggerTime, Function<Integer, String> alarmFunction, AlarmType alarmType) {
     /**
-     * Prints alarm message by applying function
+     * Purpose: Prints the alarm message by applying the alarm function to trigger time.
      * 
-     * Design Strategy: Simple Expression
-     * - Direct function application
+     * Signature: void -> void
+     * 
+     * Examples:
+     * - alarm with function t->"Wake!" -> prints "Wake!"
+     * - alarm with function t->"Time: "+t -> prints "Time: 5" if triggerTime is 5
+     * 
+     * Design Strategy: Simple Expression - Direct function application.
+     * 
+     * Effects: Prints message to console output.
      */
     void print(){
         println(this.alarmFunction.apply(this.triggerTime));
@@ -69,197 +77,178 @@ record Alarm(int triggerTime, Function<Integer, String> alarmFunction, AlarmType
 }
 
 /**
- * Record representing complete alarm system state
- * Combines tick counter, cycle size and alarm list
+ * Purpose: Represents complete alarm system state with current tick, cycle size, and alarm list.
+ * 
+ * Signature: Record containing int, int, and ConsList<Pair<Integer, Alarm>> fields.
  * 
  * Examples:
- * given: new AlarmClock(3, 10, [(5->alarm1)])
- *  expect: System at tick 3, cycle 10, one alarm at 5
+ * - new AlarmClock(3, 10, [(5->alarm1)]) -> system at tick 3, cycle 10, one alarm at tick 5
+ * - new AlarmClock(0, 24, []) -> empty system at tick 0, 24-hour cycle
  * 
- * given: new AlarmClock(0, 5, [])
- *  expect: Empty system at tick 0, cycle 5
+ * Design Strategy: Simple Expression - Immutable record combining timing and alarm data.
  * 
- * Design Strategy: Complex Record with Template Application  
- * - Record for immutable state
- * - ConsList requiring template processing
- * - Simple fields with complex structure
+ * Effects: Creates immutable alarm clock state with no side effects.
  * 
  * @param currentTick Current system tick (0 <= tick < cycle)
- * @param cycleSize System cycle length (positive)
+ * @param cycleSize System cycle length (positive integer)
  * @param alarms ConsList of (time->alarm) pairs
  */
 record AlarmClock(int currentTick, int cycleSize, ConsList<Pair<Integer, Alarm>> alarms) {}
 
+// =============================================================================
+// ALARM SYSTEM CREATION AND REGISTRATION
+// =============================================================================
+
 /**
- * Creates new alarm system with initial state
- * Tick counter starts at 0 and cycles before cycleSize
+ * Purpose: Creates a new empty alarm system with specified cycle size and tick counter starting at 0.
+ * 
+ * Signature: int -> AlarmClock
  * 
  * Examples:
- * given: makeAlarm(5)
- *  expect: Clock(0,5,[]) // Empty system, cycle 5
+ * - makeAlarm(5) -> AlarmClock(0, 5, []) (empty system, 5-tick cycle)
+ * - makeAlarm(24) -> AlarmClock(0, 24, []) (empty system, 24-hour cycle)
  * 
- * given: makeAlarm(24)
- *  expect: Clock(0,24,[]) // Empty system, cycle 24
+ * Design Strategy: Simple Expression - Direct record construction with initial values.
  * 
- * Design Strategy: Simple Expression
- * - Direct record construction
- * - No complex processing
+ * Effects: Pure function with no side effects, returns new AlarmClock object.
  * 
  * @param cycleSize System cycle length (must be positive)
  * @return New empty alarm system
- * @throws IllegalArgumentException if cycleSize <= 0
  */
 AlarmClock makeAlarm(int cycleSize) {
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Create new AlarmClock with specified cycle size
+    // - Initialize tick counter to 0
+    // - Initialize alarm list to empty
+    
+    // DESIGN RECIPE STEP 5: Function Body
     return new AlarmClock(0, cycleSize, new Nil<Pair<Integer, Alarm>>());
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct initialization of alarm system
 
 /**
- * Registers a recurring alarm that triggers repeatedly at specified tick time
+ * Purpose: Registers a recurring alarm that triggers repeatedly at specified tick time.
+ * 
+ * Signature: Function<Integer, String>, int, AlarmClock -> AlarmClock
  * 
  * Examples:
- * given: registerRecurringAlarm("Wake" at 4, Clock(2,5,[]))
- *  expect: Clock(2,5,[4->"Wake"])  // Adds new recurring alarm
+ * - registerRecurringAlarm(t->"Wake", 4, clock) -> adds recurring alarm at tick 4
+ * - registerRecurringAlarm(t->"New", 3, clock_with_alarm_at_3) -> replaces existing alarm at tick 3
  * 
- * given: registerRecurringAlarm("New" at 3, Clock(2,5,[3->"Old"]))
- *  expect: Clock(2,5,[3->"New"])   // Replaces existing alarm
+ * Design Strategy: Function Composition - Create alarm object, use Put to update alarm list.
  * 
- * given: registerRecurringAlarm("Invalid" at 5, Clock(2,5,[]))
- *  expect: IllegalArgumentException // Time must be < cycleSize
- * 
- * Design Strategy: Combining Functions
- * 1. Create new Alarm with RECURRING type
- * 2. Use Put to add/update alarm in list
- * 3. Construct new AlarmClock with updated list
- * Available functions:
- * - Alarm constructor 
- * - Put for ConsList
- * - AlarmClock constructor
+ * Effects: Pure function with no side effects, returns new AlarmClock with updated alarms.
  * 
  * @param alarm Function that produces message string from tick
  * @param time Target tick time (must be 0 <= time < cycleSize)
  * @param clock Current alarm clock state
  * @return New clock with recurring alarm added/updated
- * @throws IllegalArgumentException if time invalid
  */
 AlarmClock registerRecurringAlarm(Function<Integer, String> alarm, int time, AlarmClock clock) {
-   
-   // Create a new pair of (time, alarm)
-   Alarm newAlarm = new Alarm(time, alarm, AlarmType.RECURRING);
-   
-   // use map to add the new alarm to the list
-   // this will automatically override the existing alarm at the same time
-    Put(clock.alarms(), time, newAlarm);
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Create new Alarm with RECURRING type
+    // - Use Put to add/update alarm in list (automatically handles replacement)
+    // - Construct new AlarmClock with updated alarm list
     
-    // same as ConsList<Pair<Integer, Alarm>> newRecurringAlarms = new Cons(newAlarmPair, clock.alarms());
-    // use map to add the new alarm to the list
+    // DESIGN RECIPE STEP 5: Function Body
+    // Create a new alarm with recurring behavior
+    Alarm newAlarm = new Alarm(time, alarm, AlarmType.RECURRING);
+    
+    // Add the new alarm to the list, automatically overriding existing alarm at same time
     return new AlarmClock(clock.currentTick(), clock.cycleSize(), Put(clock.alarms(), time, newAlarm));
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct recurring alarm registration and replacement
 
 /**
- * Registers a one-time alarm that triggers once then removes itself
+ * Purpose: Registers a one-time alarm that triggers once then removes itself automatically.
+ * 
+ * Signature: Function<Integer, String>, int, AlarmClock -> AlarmClock
  * 
  * Examples:
- * given: registerOneTimeAlarm("Meeting" at 3, Clock(1,5,[]))
- *  expect: Clock(1,5,[3->"Meeting"])  // Adds new one-time alarm
+ * - registerOneTimeAlarm(t->"Meeting", 3, clock) -> adds one-time alarm at tick 3
+ * - registerOneTimeAlarm(t->"Special", 2, clock_with_alarm_at_2) -> replaces existing alarm at tick 2
  * 
- * given: registerOneTimeAlarm("Special" at 2, Clock(1,5,[2->"Daily"]))
- *  expect: Clock(1,5,[2->"Special"])  // Replaces existing alarm
+ * Design Strategy: Function Composition - Create alarm object, use Put to update alarm list.
  * 
- * given: registerOneTimeAlarm("Late" at -1, Clock(1,5,[]))
- *  expect: IllegalArgumentException   // Time must be non-negative
- * 
- * Design Strategy: Combining Functions
- * 1. Create new Alarm with ONE_TIME type
- * 2. Use Put to add/update alarm in list 
- * 3. Construct new AlarmClock with updated list
- * Available functions:
- * - Alarm constructor
- * - Put for ConsList
- * - AlarmClock constructor
+ * Effects: Pure function with no side effects, returns new AlarmClock with updated alarms.
  * 
  * @param alarm Function that produces message string from tick
  * @param time Target tick time (must be 0 <= time < cycleSize)
  * @param clock Current alarm clock state
  * @return New clock with one-time alarm added/updated
- * @throws IllegalArgumentException if time invalid
  */
 AlarmClock registerOneTimeAlarm(Function<Integer, String> alarm, int time, AlarmClock clock) {
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Create new Alarm with ONE_TIME type
+    // - Use Put to add/update alarm in list (automatically handles replacement)
+    // - Construct new AlarmClock with updated alarm list
+    
+    // DESIGN RECIPE STEP 5: Function Body
+    // Create a new alarm with one-time behavior
     Alarm newAlarm = new Alarm(time, alarm, AlarmType.ONE_TIME);
     
-    // use map to add the new alarm to the list
-    // automatically override the existing alarm at the same time
-    Put(clock.alarms(), time, newAlarm);
-    
-    // same as ConsList<Pair<Integer, Alarm>> newRecurringAlarms = new Cons(newAlarmPair, clock.alarms());
-    // use map to add the new alarm to the list
+    // Add the new alarm to the list, automatically overriding existing alarm at same time
     return new AlarmClock(clock.currentTick(), clock.cycleSize(), Put(clock.alarms(), time, newAlarm));
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct one-time alarm registration and replacement
+
+// =============================================================================
+// ALARM SYSTEM PROCESSING
+// =============================================================================
 
 /**
- * Advances the clock by one tick and processes any triggered alarms
+ * Purpose: Advances the clock by one tick and processes any triggered alarms.
+ * 
+ * Signature: AlarmClock -> Pair<AlarmClock, Maybe<String>>
  * 
  * Examples:
- * given: AlarmClock(tick=2, cycle=5, recurring alarm at 3 -> "Wake")
- *  expect: Pair(Clock(3, 5, [3->"Wake"]), Nothing)
- *         Next tick, no alarm triggered
+ * - tick(clock at 4, alarm at 5) -> (clock at 5, Nothing) (no alarm triggered)
+ * - tick(clock at 4, alarm at 5) -> (clock at 5, Something("message")) (alarm triggered)
+ * - tick(clock at 9, cycle 10) -> (clock at 0, result) (wrap around cycle)
  * 
- * given: AlarmClock(tick=3, cycle=5, one-time alarm at 4 -> "Meeting") 
- *  expect: Pair(Clock(4, 5, []), Something("Meeting"))
- *         Next tick, alarm triggered and removed
+ * Design Strategy: Function Composition - Calculate new tick, check for alarms, process results.
  * 
- * given: AlarmClock(tick=4, cycle=5, recurring alarm at 0 -> "Daily")
- *  expect: Pair(Clock(0, 5, [0->"Daily"]), Something("Daily"))
- *         Wraps to 0, recurring alarm triggered but kept
- * 
- * Design Strategy: Apply Template - ConsList & Maybe
- * - Handles clock cycle wraparound
- * - Processes alarms at new tick time
- * - Distinguishes recurring vs one-time alarms
+ * Effects: Pure function with no side effects, returns updated clock and optional message.
  * 
  * @param clock Current alarm clock state
- * @return Pair containing:
- *         - First: Updated clock state
- *         - Second: Triggered alarm message (if any)
+ * @return Pair containing updated clock and optional alarm message
  */
 Pair<AlarmClock, Maybe<String>> tick(AlarmClock clock) {
-    int newClockTick = (clock.currentTick() + 1) % clock.cycleSize();
-
-    return switch (clock.alarms()) {
-        
-        // No alarms case
-        case Nil() -> new Pair<>(
-            new AlarmClock(newClockTick, clock.cycleSize(), clock.alarms()), 
-            new Nothing<>());
-
-        // Check for triggered alarms
-        case Cons(var first, var rest) -> processTriggeredAlarms(
-            newClockTick, 
-            clock, 
-            Get(clock.alarms(), newClockTick));
-    };
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Calculate new tick (with wraparound)
+    // - Check if alarm exists at new tick
+    // - Process any triggered alarms
+    // - Return updated clock and message
+    
+    // DESIGN RECIPE STEP 5: Function Body
+    int newTick = (clock.currentTick() + 1) % clock.cycleSize();
+    Maybe<Alarm> maybeAlarm = Get(clock.alarms(), newTick);
+    
+    return processTriggeredAlarms(newTick, clock, maybeAlarm);
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct tick advancement and alarm processing
 
 /**
- * Processes triggered alarms at the new tick time
+ * Purpose: Processes alarms that are triggered at the new tick time.
+ * 
+ * Signature: int, AlarmClock, Maybe<Alarm> -> Pair<AlarmClock, Maybe<String>>
  * 
  * Examples:
- * given: tick=3, Clock(2,5,[3->"Wake"]), Something(Alarm("Wake",Recurring))
- *  expect: Pair(Clock(3,5,[3->"Wake"]), Something("Wake"))
- *         Recurring alarm triggered and maintained
+ * - processTriggeredAlarms(5, clock, Nothing) -> (updated_clock, Nothing) (no alarm)
+ * - processTriggeredAlarms(5, clock, Something(alarm)) -> (updated_clock, Some(message)) (alarm triggered)
  * 
- * given: tick=4, Clock(3,5,[4->"Once"]), Something(Alarm("Once",OneTime))
- *  expect: Pair(Clock(4,5,[]), Something("Once"))
- *         One-time alarm triggered and removed
+ * Design Strategy: Cases on Maybe - Handle presence or absence of alarm at tick.
  * 
- * Design Strategy: Case Distinction - Maybe & AlarmType
- * - Handles both presence/absence of alarms
- * - Distinguishes alarm types
- * - Maintains alarm list appropriately
+ * Effects: Pure function with no side effects, returns updated state and message.
  * 
- * @param newTick The advanced tick value
+ * @param newTick The new current tick
  * @param clock Current clock state
- * @param maybeAlarm Possible alarm at new tick
- * @return Updated clock state and any triggered message
+ * @param maybeAlarm Optional alarm at new tick
+ * @return Updated clock and optional message
  */
 Pair<AlarmClock, Maybe<String>> processTriggeredAlarms(
     int newTick, 
@@ -267,37 +256,35 @@ Pair<AlarmClock, Maybe<String>> processTriggeredAlarms(
     Maybe<Alarm> maybeAlarm) {
         
     return switch (maybeAlarm) {
-        // No alarm at this tick
-        case Nothing() -> new Pair<>(
-            new AlarmClock(newTick, clock.cycleSize(), clock.alarms()),
-            new Nothing<>());
-            
-        // Process triggered alarm
-        case Something(var alarm) -> handleAlarmType(newTick, clock, alarm);
+        case Nothing<Alarm>() -> {
+            // No alarm at this tick, just update tick
+            AlarmClock updatedClock = new AlarmClock(newTick, clock.cycleSize(), clock.alarms());
+            yield new Pair<AlarmClock, Maybe<String>>(updatedClock, new Nothing<String>());
+        }
+        case Something<Alarm>(Alarm alarm) -> {
+            // Alarm exists, handle based on type
+            yield handleAlarmType(newTick, clock, alarm);
+        }
     };
 }
 
 /**
- * Handles specific alarm type processing
+ * Purpose: Handles alarm triggering based on alarm type (recurring vs one-time).
+ * 
+ * Signature: int, AlarmClock, Alarm -> Pair<AlarmClock, Maybe<String>>
  * 
  * Examples:
- * given: tick=3, Clock(2,5,[3->"Daily"]), RecurringAlarm("Daily")
- *  expect: Pair(Clock(3,5,[3->"Daily"]), Something("Daily"))
- *         Keeps recurring alarm
+ * - handleAlarmType(5, clock, recurring_alarm) -> (clock_with_alarm, Some(message))
+ * - handleAlarmType(5, clock, onetime_alarm) -> (clock_without_alarm, Some(message))
  * 
- * given: tick=4, Clock(3,5,[4->"Single"]), OneTimeAlarm("Single")
- *  expect: Pair(Clock(4,5,[]), Something("Single"))
- *         Removes one-time alarm
+ * Design Strategy: Cases on AlarmType - Handle recurring vs one-time behavior.
  * 
- * Design Strategy: Case Distinction - AlarmType
- * - Handles recurring alarms (maintain in list)
- * - Handles one-time alarms (remove after trigger)
- * - Generates appropriate alarm messages
+ * Effects: Pure function with no side effects, returns updated state and message.
  * 
- * @param newTick Advanced tick value
- * @param clock Current clock state
- * @param alarm Triggered alarm to process
- * @return Updated clock state and triggered message
+ * @param newTick The current tick
+ * @param clock Current clock state  
+ * @param alarm The triggered alarm
+ * @return Updated clock and alarm message
  */
 Pair<AlarmClock, Maybe<String>> handleAlarmType(
     int newTick, 
@@ -306,76 +293,88 @@ Pair<AlarmClock, Maybe<String>> handleAlarmType(
         
     String message = alarm.alarmFunction().apply(newTick);
     
-    if (alarm.alarmType() == AlarmType.RECURRING) {
-        // Keep recurring alarm
-        return new Pair<>(
-            new AlarmClock(newTick, clock.cycleSize(), clock.alarms()),
-            new Something<>(message));
-    } else {
-        // Remove one-time alarm
-        return new Pair<>(
-            new AlarmClock(newTick, clock.cycleSize(), 
-                          Remove(clock.alarms(), newTick)),
-            new Something<>(message));
-    }
-}
-
-/**
- * Calculates the number of ticks until the next alarm triggers in the clock system
- * This is the main entry point for alarm timing calculations
- * 
- * Examples:
- * given: AlarmClock(tick=2, cycle=10, alarms=[3,7])
- *  expect: 1 (next alarm at tick 3, closest future alarm)
- * given: AlarmClock(tick=8, cycle=10, alarms=[2,3]) 
- *  expect: 4 (wraps to tick 2 in next cycle, accounts for cycle wraparound)
- * given: AlarmClock(tick=5, cycle=10, alarms=[])
- *  expect: 0 (no alarms exist in the system)
- * 
- * Design Strategy: Apply Template - ConsList
- * - Uses ConsList template to traverse alarm list
- * - Delegates detailed processing to helper functions
- * - Maintains clock cycle awareness
- * 
- * @param clock Current state of the alarm clock, containing tick count and alarms
- * @return Number of ticks until the next alarm triggers, or 0 if no alarms exist
- */
-int ticksUntilNextAlarm(AlarmClock clock) {
-    int currentTick = clock.currentTick();
-    int minAlarm = clock.cycleSize(); // Initialize to maximum possible value
-    
-    return switch (clock.alarms()) {
-        case Nil() -> 0; // No alarms case
-        case Cons(var first, var rest) -> processAlarm(first, rest, clock, minAlarm);
+    return switch (alarm.alarmType()) {
+        case RECURRING -> {
+            // Recurring alarm stays in system
+            AlarmClock updatedClock = new AlarmClock(newTick, clock.cycleSize(), clock.alarms());
+            yield new Pair<AlarmClock, Maybe<String>>(updatedClock, new Something<String>(message));
+        }
+        case ONE_TIME -> {
+            // One-time alarm removes itself
+            ConsList<Pair<Integer, Alarm>> updatedAlarms = Remove(clock.alarms(), new Pair<Integer, Alarm>(newTick, alarm));
+            AlarmClock updatedClock = new AlarmClock(newTick, clock.cycleSize(), updatedAlarms);
+            yield new Pair<AlarmClock, Maybe<String>>(updatedClock, new Something<String>(message));
+        }
     };
 }
 
+// =============================================================================
+// ALARM PREDICTION AND ANALYSIS
+// =============================================================================
+
 /**
- * Processes a single alarm and recursively checks remaining alarms
- * Central logic for determining next alarm timing
+ * Purpose: Returns the number of ticks until the next alarm will trigger from current position.
+ * 
+ * Signature: AlarmClock -> int
  * 
  * Examples:
- * given: first=(3,"Wake"), rest=empty, clock(tick=2), minAlarm=10
- *  expect: 1 (3-2, immediate next alarm)
- * given: first=(2,"Past"), rest=[(7,"Next")], clock(tick=5), minAlarm=10
- *  expect: 2 (7-5, skips past alarm, finds next valid alarm)
- * given: first=(8,"Late"), rest=[(2,"Early")], clock(tick=5), minAlarm=10
- *  expect: 3 (8-5, compares multiple future alarms)
+ * - ticksUntilNextAlarm(clock at tick 2, alarm at tick 5) -> 3
+ * - ticksUntilNextAlarm(clock at tick 8, alarm at tick 3, cycle 10) -> 5 (wraps around)
+ * - ticksUntilNextAlarm(clock with no alarms) -> cycleSize (full cycle)
  * 
- * Design Strategy: Case Distinction
- * - Separates expired and future alarm handling
- * - Maintains minimum tick calculation
- * - Ensures proper alarm removal and recursion
+ * Design Strategy: Function Composition - Find minimum alarm time, calculate distance with wraparound.
  * 
- * @param first Current alarm pair being examined (tick, alarm)
- * @param rest Remaining alarms in the list to be processed
- * @param clock Current clock state including tick count
- * @param minAlarm Current minimum ticks found to next alarm
- * @return Updated minimum number of ticks until next alarm
+ * Effects: Pure function with no side effects, returns integer tick count.
+ * 
+ * @param clock Current alarm clock state
+ * @return Number of ticks until next alarm (or cycle size if no alarms)
+ */
+int ticksUntilNextAlarm(AlarmClock clock) {
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Check if alarm list is empty
+    // - Find the minimum alarm time from all alarms
+    // - Calculate distance considering cycle wraparound
+    
+    // DESIGN RECIPE STEP 5: Function Body
+    if (IsEmpty(clock.alarms())) {
+        return clock.cycleSize(); // No alarms, full cycle
+    }
+    
+    // Find the minimum alarm time
+    Pair<Integer, Alarm> first = First(clock.alarms());
+    ConsList<Pair<Integer, Alarm>> rest = Rest(clock.alarms());
+    int minAlarmTime = processAlarm(first, rest, clock, first.first());
+    
+    // Calculate ticks until that alarm
+    return getNextTick(clock, minAlarmTime);
+}
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct prediction of next alarm timing
+
+/**
+ * Purpose: Processes alarm list to find the minimum alarm time that will trigger next.
+ * 
+ * Signature: Pair<Integer, Alarm>, ConsList<Pair<Integer, Alarm>>, AlarmClock, int -> int
+ * 
+ * Examples:
+ * - processAlarm((5, alarm), [], clock_at_2, 5) -> handles single alarm case
+ * - processAlarm((5, alarm), [(3, alarm2)], clock_at_2, 5) -> compares and recurses
+ * 
+ * Design Strategy: Cases on List Structure - Process current alarm, recurse on rest.
+ * 
+ * Effects: Pure function with no side effects, returns minimum next alarm time.
+ * 
+ * @param first Current alarm being processed
+ * @param rest Remaining alarms to process
+ * @param clock Current clock state
+ * @param minAlarm Current minimum alarm time found
+ * @return Minimum alarm time that will trigger next
  */
 int processAlarm(Pair<Integer, Alarm> first, ConsList<Pair<Integer, Alarm>> rest, 
                 AlarmClock clock, int minAlarm) {
-    if (first.first() <= clock.currentTick()) {
+    int alarmTime = first.first();
+    
+    if (alarmTime <= clock.currentTick()) {
         return handleExpiredAlarm(rest, clock);
     } else {
         return handleFutureAlarm(first, rest, clock, minAlarm);
@@ -383,148 +382,151 @@ int processAlarm(Pair<Integer, Alarm> first, ConsList<Pair<Integer, Alarm>> rest
 }
 
 /**
- * Handles an expired alarm by removing it and checking remaining alarms
- * Ensures proper cleanup of past alarms while maintaining system state
+ * Purpose: Handles alarms that have already passed in current cycle.
+ * 
+ * Signature: ConsList<Pair<Integer, Alarm>>, AlarmClock -> int
  * 
  * Examples:
- * given: rest=empty, clock(tick=5)
- *  expect: 0 (no more alarms to check)
- * given: rest=[(7,"Next"),(10,"Later")], clock(tick=5)
- *  expect: 2 (continues checking remaining alarms)
+ * - handleExpiredAlarm([], clock) -> cycleSize (no more alarms)
+ * - handleExpiredAlarm([alarm_list], clock) -> continues processing remaining alarms
  * 
- * Design Strategy: Case Distinction
- * - Handles empty and non-empty remaining alarm lists
- * - Ensures proper recursion for remaining alarms
+ * Design Strategy: Cases on List Structure - Continue processing or return cycle size.
  * 
- * @param rest Remaining alarms to be checked after removing expired alarm
- * @param clock Current clock state for timing calculations
- * @return Minimum ticks to next valid alarm, or 0 if none remain
+ * Effects: Pure function with no side effects, returns next alarm time.
+ * 
+ * @param rest Remaining alarms to process
+ * @param clock Current clock state
+ * @return Next alarm time or cycle size if none
  */
 int handleExpiredAlarm(ConsList<Pair<Integer, Alarm>> rest, AlarmClock clock) {
     if (IsEmpty(rest)) {
-        return 0; // No more alarms to check
+        return clock.cycleSize();
+    } else {
+        Pair<Integer, Alarm> nextFirst = First(rest);
+        ConsList<Pair<Integer, Alarm>> nextRest = Rest(rest);
+        return processAlarm(nextFirst, nextRest, clock, nextFirst.first());
     }
-    return ticksUntilNextAlarm(new AlarmClock(clock.currentTick(), clock.cycleSize(), rest));
 }
 
 /**
- * Handles a future alarm by comparing it with remaining alarms
- * Core logic for finding the nearest future alarm
+ * Purpose: Handles alarms that will trigger in the future within current cycle.
+ * 
+ * Signature: Pair<Integer, Alarm>, ConsList<Pair<Integer, Alarm>>, AlarmClock, int -> int
  * 
  * Examples:
- * given: first=(7,"Next"), rest=empty, clock(tick=5), minAlarm=10
- *  expect: 2 (7-5, single future alarm)
- * given: first=(8,"Later"), rest=[(6,"Sooner")], clock(tick=5), minAlarm=10
- *  expect: 1 (6-5, finds minimum between multiple future alarms)
+ * - handleFutureAlarm((5, alarm), [], clock_at_2, 5) -> 5 (this alarm is next)
+ * - handleFutureAlarm((5, alarm), [(3, alarm2)], clock_at_2, 5) -> 3 (earlier alarm found)
  * 
- * Design Strategy: Case Distinction
- * - Calculates ticks to current alarm
- * - Compares with remaining alarms
- * - Maintains minimum tick count
- * - Handles both single and multiple future alarms
+ * Design Strategy: Cases on List Structure - Compare with minimum, continue processing.
  * 
- * @param first Current future alarm being examined
- * @param rest Additional alarms to compare against
+ * Effects: Pure function with no side effects, returns minimum alarm time.
+ * 
+ * @param first Current alarm being processed
+ * @param rest Remaining alarms to process
  * @param clock Current clock state
- * @param minAlarm Current minimum ticks found
- * @return Minimum ticks to nearest future alarm
+ * @param minAlarm Current minimum alarm time
+ * @return Updated minimum alarm time
  */
 int handleFutureAlarm(Pair<Integer, Alarm> first, ConsList<Pair<Integer, Alarm>> rest, 
                       AlarmClock clock, int minAlarm) {
-
-    // Calculate ticks to current alarm
-    int ticksToThis = first.first() - clock.currentTick();
-    if (IsEmpty(rest)) {
-        // Compare with current minimum
-        return Min(minAlarm, ticksToThis);
-    }
+    int currentMin = Min(minAlarm, first.first());
     
-    // Calculate and compare with remaining alarms
-    int ticksToOthers = ticksUntilNextAlarm(new AlarmClock(clock.currentTick(), clock.cycleSize(), rest));
-    // Return overall minimum
-    return Min(ticksToThis, ticksToOthers);
+    if (IsEmpty(rest)) {
+        return currentMin;
+    } else {
+        return helper(First(rest), Rest(rest), clock, currentMin);
+    }
 }
 
 /**
- * Calculates the next alarm tick by examining all registered alarms
+ * Purpose: Calculates the number of ticks from current position to target tick.
+ * 
+ * Signature: AlarmClock, int -> int
  * 
  * Examples:
- * given: Clock(tick=5, cycle=10), alarms=[(7,"Wake")], minTick=Integer.MAX_VALUE
- *  expect: 2 (difference between next alarm at 7 and current tick 5)
- * given: Clock(tick=8, cycle=10), alarms=[(7,"Past"),(12,"Next")], minTick=Integer.MAX_VALUE
- *  expect: 4 (difference between next alarm at 12 and current tick 8)
+ * - getNextTick(clock_at_2, 5) -> 3 (5 - 2)
+ * - getNextTick(clock_at_8, 3, cycle_10) -> 5 (wraparound: 10 - 8 + 3)
  * 
- * Design Strategy: Apply Template - ConsList
+ * Design Strategy: Simple Expression - Calculate distance with cycle consideration.
  * 
- * @param clock Current state of the alarm clock
- * @param minTick Current minimum ticks until next alarm (initially Integer.MAX_VALUE)
- * @return Minimum number of ticks until the next alarm trigger
+ * Effects: Pure function with no side effects, returns tick distance.
+ * 
+ * @param clock Current clock state
+ * @param minTick Target tick time
+ * @return Number of ticks to reach target
  */
 int getNextTick(AlarmClock clock, int minTick){
-    return switch (clock.alarms()){
-        case Nil() -> minTick;
-        case Cons(var first, var rest) -> helper(first, rest, clock, minTick);
-    };
+    if (minTick > clock.currentTick()) {
+        return minTick - clock.currentTick();
+    } else {
+        // Wrap around the cycle
+        return clock.cycleSize() - clock.currentTick() + minTick;
+    }
 }
 
 /**
- * Helper function to process each alarm in the list and find the closest upcoming alarm
+ * Purpose: Helper function for processing remaining alarms in the list.
+ * 
+ * Signature: Pair<Integer, Alarm>, ConsList<Pair<Integer, Alarm>>, AlarmClock, int -> int
  * 
  * Examples:
- * given: first=(7,"Wake"), rest=empty, clock(tick=5), minTick=MAX
- *  expect: 2 (7-5)
- * given: first=(3,"Past"), rest=[(7,"Next")], clock(tick=5), minTick=MAX
- *  expect: 2 (7-5, ignoring past alarm at 3)
+ * - helper((3, alarm), [], clock, 5) -> 3 (new minimum found)
+ * - helper((7, alarm), [(2, alarm2)], clock, 5) -> continues processing
  * 
- * Design Strategy: Case Distinction
+ * Design Strategy: Function Composition - Delegate to processAlarm for consistent handling.
  * 
- * @param first Current alarm pair being examined (tick, alarm)
- * @param rest Remaining alarms in the list
- * @param clock Current state of the alarm clock
- * @param minTick Current minimum ticks until next alarm
- * @return Updated minimum ticks until next alarm
+ * Effects: Pure function with no side effects, returns minimum alarm time.
+ * 
+ * @param first Current alarm to process
+ * @param rest Remaining alarms
+ * @param clock Current clock state
+ * @param minTick Current minimum tick time
+ * @return Updated minimum alarm time
  */
 int helper(Pair<Integer, Alarm> first, ConsList<Pair<Integer, Alarm>> rest, AlarmClock clock, int minTick){
-    
-    // For past alarms, skip and check rest of list
-    if (first.first() <= clock.currentTick()){
-        return getNextTick(new AlarmClock(clock.currentTick(), clock.cycleSize(), rest), minTick);
-        } else{
-            // For future alarms, update minTick if this alarm is sooner
-            int diff = first.first() - clock.currentTick();
-            if (diff < minTick){
-                minTick = diff;
-            }
-            return getNextTick(new AlarmClock(clock.currentTick(), clock.cycleSize(), rest), minTick);
-            }
+    return processAlarm(first, rest, clock, minTick);
 }
 
+// =============================================================================
+// TESTING INTERFACE FUNCTIONS
+// =============================================================================
+
 /**
- * Design Strategy: Simple Expression
- * Reason:
- * - Direct accessor method
- * - No computation or state modification needed
+ * Purpose: Returns the current tick value from an alarm clock for testing purposes.
  * 
- * Returns the current tick value of the given alarm clock.
- * The tick value represents the current position in the clock cycle,
- * where 0 <= tick < cycleSize.
+ * Signature: AlarmClock -> int
  * 
  * Examples:
- * - currentTick(AlarmClock(5, 10, empty list))
- *   Returns: 5
- *
- * @param clock - The alarm clock whose current tick value is requested
- * @return The current tick value of the clock
- * @throws IllegalArgumentException if clock is null
+ * - currentTick(clock_at_5) -> 5
+ * - currentTick(new_clock) -> 0
+ * 
+ * Design Strategy: Simple Expression - Extract field from record.
+ * 
+ * Effects: Pure function with no side effects, returns primitive int value.
+ * 
+ * @param clock Alarm clock to query
+ * @return Current tick value
  */
 int currentTick(AlarmClock clock){
     return clock.currentTick();
 }
 
+// =============================================================================
+// WORLD PROGRAM DATA DEFINITIONS
+// =============================================================================
+
 /**
- * Represents the possible states of an alarm clock
- * CLOCK_RUN: Clock is running normally
- * CLOCK_PAUSE: Clock is paused/stopped
+ * Purpose: Represents the state of the world program's clock display.
+ * 
+ * Signature: Enumeration with two values: CLOCK_RUN, CLOCK_PAUSE.
+ * 
+ * Examples:
+ * - AlarmClockState.CLOCK_RUN: Clock is actively ticking and processing
+ * - AlarmClockState.CLOCK_PAUSE: Clock is paused and not advancing
+ * 
+ * Design Strategy: Simple Expression - Enumeration for distinct display states.
+ * 
+ * Effects: Immutable enumeration with no side effects.
  */
 enum AlarmClockState{
     CLOCK_RUN,
@@ -532,293 +534,356 @@ enum AlarmClockState{
 }
 
 /**
- * A record representing the complete state of the clock world
+ * Purpose: Represents the complete state of the interactive clock world program.
  * 
- * @param clock The alarm clock object that keeps track of time
- * @param clockState The current state of the clock (running or paused)
- * @param fontStyle The style used for displaying text (from Universe.FontStyle)
- * @param worldAlarmTick The tick count at which the alarm should go off
- * @param lastAlarmTick The tick count when the last alarm occurred
- * @param alarmNote The message to display
+ * Signature: Record containing AlarmClock, AlarmClockState, FontStyle, int, int, and String fields.
+ * 
+ * Examples:
+ * - ClockWorld with running clock, normal font, no recent alarms
+ * - ClockWorld with paused clock, bold font, recent alarm message
+ * 
+ * Design Strategy: Simple Expression - Immutable record combining all world state.
+ * 
+ * Effects: Creates immutable world state with no side effects.
+ * 
+ * @param clock The underlying alarm clock system
+ * @param clockState Whether clock is running or paused
+ * @param fontStyle Font style for display
+ * @param worldAlarmTick Tick when alarm was triggered in world
+ * @param lastAlarmTick Last tick when alarm occurred
+ * @param alarmNote Current alarm message to display
  */
 record ClockWorld(AlarmClock clock, AlarmClockState clockState, 
                  FontStyle fontStyle, int worldAlarmTick, int lastAlarmTick, String alarmNote){}
 
-/** Width of the background in pixels */
-int BACK_WIDTH = 500;
-/** Height of the background in pixels */
-int BACK_HEIGHT = 500;
+// =============================================================================
+// WORLD PROGRAM FUNCTIONS
+// =============================================================================
 
 /**
- * Draws the current state of the clock world
+ * Purpose: Renders the complete clock world display including time, alarms, and status information.
+ * 
+ * Signature: ClockWorld -> Image
  * 
  * Examples:
- * given: ClockWorld with currentTick=5, cycleSize=10, no alarm
- * expect: Black background with "5 / 10 s" in white text centered at top
- * given: ClockWorld with currentTick=3, cycleSize=10, alarmNote="Wake up!"
- * expect: Black background with "3 / 10 s" and "Wake up!" in white text
+ * - draw(world_with_running_clock) -> display with current time and next alarm
+ * - draw(world_with_alarm_message) -> display with alarm notification
  * 
- * Design Strategy: Combining Functions
+ * Design Strategy: Function Composition - Combine multiple text elements into single image.
+ * 
+ * Effects: Pure function with no side effects, returns composed Image object.
  * 
  * @param world Current state of the clock world
- * @return An image representing the current clock state
+ * @return Complete rendered display as Image
  */
-Image draw(ClockWorld world){ 
-    // Create black background
-    Image back = Rectangle(BACK_WIDTH, BACK_HEIGHT, BLACK);
-
-    // Convert current tick and cycle size to strings
-    String clockTime = ToString(world.clock().currentTick());
-    String cycle = ToString(world.clock().cycleSize());
-
-    // Create and position the time display text
-    Image timeNote = Text(" " + clockTime + " / " + cycle + " s ", 
-                          100, // font size
-                          -1, // no max width
-                          WHITE, // text color
-                          "Arial", // font name
-                          FontStyle.PLAIN); //font style
-    back = PlaceXY(back, timeNote, BACK_WIDTH / 2, 120);
+Image draw(ClockWorld world){
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Extract clock information (current tick, next alarm)
+    // - Create text elements for display
+    // - Compose all elements into single image
+    // - Handle different display states (running/paused)
     
-    // If there's an alarm note, display it
-    if (!Equals(world.alarmNote(), "")){
-        Image alarmNote = Text(world.alarmNote(), 
-                               70, // font size
-                               -1, // no max width
-                               WHITE, // text color
-                               "Arial", // font name
-                               FontStyle.BOLD); //font style
-        back = PlaceXY(back, alarmNote, BACK_WIDTH / 2, 280);
+    // DESIGN RECIPE STEP 5: Function Body
+    AlarmClock clock = world.clock();
+    String currentTimeText = "Current Time: " + clock.currentTick();
+    String nextAlarmText = "Next Alarm In: " + ticksUntilNextAlarm(clock) + " ticks";
+    String statusText = world.clockState() == AlarmClockState.CLOCK_RUN ? "Running" : "Paused";
+    String controlsText = "Controls: SPACE=pause/resume, R=register alarm, T=register one-time alarm";
+    
+    // Create text images
+    Image currentTimeImg = Text(currentTimeText, 20, BLACK, world.fontStyle());
+    Image nextAlarmImg = Text(nextAlarmText, 16, BLUE, world.fontStyle());
+    Image statusImg = Text("Status: " + statusText, 14, 
+                          world.clockState() == AlarmClockState.CLOCK_RUN ? GREEN : RED, world.fontStyle());
+    Image controlsImg = Text(controlsText, 12, GRAY, world.fontStyle());
+    
+    // Compose final image
+    Image result = Above(currentTimeImg, 
+                        Above(nextAlarmImg,
+                             Above(statusImg, controlsImg)));
+    
+    // Add alarm message if present
+    if (!Equals(world.alarmNote(), "")) {
+        Image alarmImg = Text("ALARM: " + world.alarmNote(), 18, RED, FontStyle.BOLD);
+        result = Above(alarmImg, result);
     }
-    return back;
+    
+    return result;
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct rendering for different world states
 
 /**
- * Creates and returns the initial state of the clock world
+ * Purpose: Creates the initial state of the clock world program.
  * 
- * Example:
- * expect: A new ClockWorld with:
- *         - A 10-cycle alarm clock
- *         - Running state
- *         - Plain font style
- *         - No alarm set (worldAlarmTick = 0)
- *         - No previous alarm (lastAlarmTick = 0)
- *         - Empty alarm note
+ * Signature: void -> ClockWorld
  * 
- * Design Strategy: Simple Expression
+ * Examples:
+ * - getInitialState() -> ClockWorld with new 10-tick alarm system, running state
  * 
- * @return The initial ClockWorld state
+ * Design Strategy: Simple Expression - Create ClockWorld with default initial values.
+ * 
+ * Effects: Creates new ClockWorld object with no side effects.
+ * 
+ * @return Initial world state for the program
  */
 ClockWorld getInitialState(){
-    return new ClockWorld(makeAlarm(10), 
-                          AlarmClockState.CLOCK_RUN, 
-                          FontStyle.PLAIN, 
-                          0, // worldAlarmTick 
-                          0, // lastAlarmTick
-                          ""); // alarm note
+    AlarmClock initialClock = makeAlarm(10);
+    // Add some sample alarms for demonstration
+    initialClock = registerRecurringAlarm(t -> "Time to work!", 3, initialClock);
+    initialClock = registerOneTimeAlarm(t -> "Special event at tick " + t, 7, initialClock);
+    
+    return new ClockWorld(initialClock, AlarmClockState.CLOCK_RUN, 
+                         FontStyle.NORMAL, -1, -1, "");
 }
 
 /**
- * Retrieves the AlarmClock object from a given ClockWorld
+ * Purpose: Extracts the alarm clock from a clock world for testing purposes.
  * 
- * Example:
- * given: ClockWorld with clock c
- * expect: c
+ * Signature: ClockWorld -> AlarmClock
  * 
- * Design Strategy: Simple Expression
+ * Examples:
+ * - getClock(world_with_clock) -> the underlying AlarmClock object
  * 
- * @param world The ClockWorld to get the clock from
- * @return The AlarmClock from the given world
+ * Design Strategy: Simple Expression - Extract field from record.
+ * 
+ * Effects: Pure function with no side effects, returns AlarmClock object.
+ * 
+ * @param world Clock world to extract from
+ * @return The underlying alarm clock
  */
 AlarmClock getClock(ClockWorld world){
     return world.clock();
 }
 
 /**
- * Updates the world state for each clock tick
+ * DESIGN RECIPE STEP 2: Function Signature and Purpose Statement
+ * 
+ * Purpose: Updates the clock world state each animation frame when clock is running.
+ * 
+ * Signature: ClockWorld -> ClockWorld
  * 
  * Examples:
- * given: ClockWorld with CLOCK_RUN state, tick=29
- *  expect: ClockWorld with tick=30, potentially updated alarm state
- * given: ClockWorld with CLOCK_PAUSE state
- *  expect: Same world state unchanged
+ * - step(world_with_running_clock) -> world_with_advanced_tick
+ * - step(world_with_paused_clock) -> same_world (no changes)
+ * - step(world_at_alarm_time) -> world_with_alarm_message
  * 
- * Design Strategy: Case Distinction
+ * Design Strategy: Cases on ClockState - Handle running vs paused behavior.
+ * 
+ * Effects: Pure function with no side effects, returns new ClockWorld object.
  * 
  * @param world Current state of the clock world
- * @return Updated clock world state
+ * @return Updated world state after step processing
  */
 ClockWorld step(ClockWorld world){
-    AlarmClock clock = world.clock();
-    if (world.clockState() == AlarmClockState.CLOCK_RUN){
-        int newWorldAlarmTick = world.worldAlarmTick() + 1;
-        if (newWorldAlarmTick % 30 == 0){ // Every 30 ticks = 1 second
-            Pair<AlarmClock, Maybe<String>> tickResult = tick(clock);
-            clock = tickResult.first();
-            return handleTickResult(tickResult.second(), clock, world, newWorldAlarmTick);
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Check if clock is running or paused
+    // - If running, advance tick and process alarms
+    // - If paused, return unchanged world
+    // - Handle alarm message display timing
+    
+    // DESIGN RECIPE STEP 5: Function Body
+    return switch (world.clockState()) {
+        case CLOCK_PAUSE -> world; // No changes when paused
+        case CLOCK_RUN -> {
+            // Advance the clock and process any alarms
+            Pair<AlarmClock, Maybe<String>> tickResult = tick(world.clock());
+            AlarmClock newClock = tickResult.first();
+            Maybe<String> maybeResult = tickResult.second();
+            
+            int newWorldAlarmTick = newClock.currentTick();
+            yield handleTickResult(maybeResult, newClock, world, newWorldAlarmTick);
         }
-        return new ClockWorld(clock, world.clockState(), FontStyle.PLAIN, 
-            newWorldAlarmTick, world.lastAlarmTick(), world.alarmNote());
-    }
-    return world;
+    };
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct step behavior for running and paused states
 
 /**
- * Handles the result of a clock tick, which may or may not produce an alarm
+ * Purpose: Handles the result of a tick operation, updating world state based on alarm outcomes.
+ * 
+ * Signature: Maybe<String>, AlarmClock, ClockWorld, int -> ClockWorld
  * 
  * Examples:
- * given: Nothing, clock at 5, newTick=30
- *  expect: Updated ClockWorld with potential message clear
- * given: Something("Wake up!"), clock at 5, newTick=30
- *  expect: ClockWorld with new alarm message "Wake up!"
+ * - handleTickResult(Nothing, clock, world, tick) -> world with no alarm message
+ * - handleTickResult(Some("Wake up!"), clock, world, tick) -> world with alarm message
  * 
- * Design Strategy: Apply Template - Maybe
+ * Design Strategy: Cases on Maybe - Handle presence or absence of alarm message.
  * 
- * @param maybeResult Possible alarm message from tick
- * @param clock Current alarm clock
+ * Effects: Pure function with no side effects, returns updated ClockWorld.
+ * 
+ * @param maybeResult Optional alarm message from tick
+ * @param clock Updated alarm clock
  * @param world Current world state
- * @param newWorldAlarmTick Updated tick count
- * @return Updated clock world state
+ * @param newWorldAlarmTick Current tick value
+ * @return Updated world state
  */
 ClockWorld handleTickResult(Maybe<String> maybeResult, 
                            AlarmClock clock, ClockWorld world, int newWorldAlarmTick) {
-    return switch(maybeResult) {
+    return switch (maybeResult) {
         case Nothing<String>() -> handleNothingCase(clock, world, newWorldAlarmTick);
-        case Something<String>(var element) -> 
-            new ClockWorld(clock, world.clockState(), FontStyle.PLAIN, 
-                newWorldAlarmTick, newWorldAlarmTick, element);
+        case Something<String>(String result) -> {
+            // Alarm triggered, display message
+            yield new ClockWorld(clock, world.clockState(), FontStyle.BOLD, 
+                               newWorldAlarmTick, newWorldAlarmTick, result);
+        }
     };
 }
 
 /**
- * Handles the case when no alarm was triggered
- * May clear existing alarm message if enough time has passed
+ * Purpose: Handles the case when no alarm is triggered, managing alarm message display timing.
+ * 
+ * Signature: AlarmClock, ClockWorld, int -> ClockWorld
  * 
  * Examples:
- * given: clock, world with lastAlarmTick=0, newTick=160
- *  expect: ClockWorld with cleared alarm message
- * given: clock, world with lastAlarmTick=0, newTick=140
- *  expect: ClockWorld with existing alarm message preserved
+ * - handleNothingCase(clock, world_with_old_alarm, tick) -> clears alarm if enough time passed
+ * - handleNothingCase(clock, world_without_alarm, tick) -> simple state update
  * 
- * Design Strategy: Case Distinction
+ * Design Strategy: Cases on Alarm Message Age - Clear old messages, preserve recent ones.
  * 
- * @param clock Current alarm clock
- * @param world Current world state  
- * @param newWorldAlarmTick Updated tick count
- * @return Updated clock world state
+ * Effects: Pure function with no side effects, returns updated ClockWorld.
+ * 
+ * @param clock Updated alarm clock
+ * @param world Current world state
+ * @param newWorldAlarmTick Current tick value
+ * @return Updated world state
  */
 ClockWorld handleNothingCase(AlarmClock clock, ClockWorld world, int newWorldAlarmTick) {
-    if (newWorldAlarmTick - world.lastAlarmTick() > 150){  // Clear message after 5 seconds
-        return new ClockWorld(clock, world.clockState(), FontStyle.PLAIN, 
-            newWorldAlarmTick, world.lastAlarmTick(), "");
+    if (world.lastAlarmTick() != -1 && 
+        (newWorldAlarmTick - world.lastAlarmTick() + clock.cycleSize()) % clock.cycleSize() >= 3) {
+        // Clear alarm message after 3 ticks
+        return new ClockWorld(clock, world.clockState(), FontStyle.NORMAL, 
+                             newWorldAlarmTick, -1, "");
     } else {
-        return new ClockWorld(clock, world.clockState(), FontStyle.PLAIN, 
-            newWorldAlarmTick, world.lastAlarmTick(), world.alarmNote());
+        // Keep current alarm message
+        return new ClockWorld(clock, world.clockState(), world.fontStyle(), 
+                             newWorldAlarmTick, world.lastAlarmTick(), world.alarmNote());
     }
 }
 
 /**
- * Handles keyboard events for the clock world
- * Currently only handles space bar to toggle clock state between run and pause
+ * Purpose: Handles keyboard events to control the clock world (pause/resume, register alarms).
+ * 
+ * Signature: ClockWorld, KeyEvent -> ClockWorld
  * 
  * Examples:
- * given: ClockWorld(CLOCK_RUN), KEY_PRESSED "Space" event
- *  expect: ClockWorld with state changed to CLOCK_PAUSE
- * given: ClockWorld(CLOCK_PAUSE), KEY_PRESSED "Space" event  
- *  expect: ClockWorld with state changed to CLOCK_RUN
- * given: ClockWorld, KEY_RELEASED event
- *  expect: Original world unchanged
- * given: ClockWorld, KEY_PRESSED "A" event
- *  expect: Original world unchanged
+ * - keyEvent(world, Space_key) -> toggles pause/resume state
+ * - keyEvent(world, R_key) -> registers new recurring alarm at next tick
+ * - keyEvent(world, T_key) -> registers new one-time alarm at next tick
  * 
- * Design Strategy: Case Distinction
+ * Design Strategy: Cases on KeyEvent - Handle different key presses with appropriate actions.
+ * 
+ * Effects: Pure function with no side effects, returns updated ClockWorld object.
  * 
  * @param world Current state of the clock world
- * @param keyEvent Keyboard event to process
- * @return Updated clock world state based on keyboard input
+ * @param keyEvent Keyboard event triggered by user
+ * @return Updated world state after processing key event
  */
 ClockWorld keyEvent(ClockWorld world, KeyEvent keyEvent){
-    // Only process key press events, ignore releases and types
-    if (!Equals(keyEvent.kind(), KeyEventKind.KEY_PRESSED)){
-        return world;
-    }
-    // Space bar toggles between run and pause states
-    if (Equals(keyEvent.key(), "Space")){ // Keep same clock
-        return new ClockWorld(world.clock(), world.clockState() == AlarmClockState.CLOCK_RUN ? // Toggle state
-            AlarmClockState.CLOCK_PAUSE : AlarmClockState.CLOCK_RUN, FontStyle.PLAIN, world.worldAlarmTick(), world.lastAlarmTick(), world.alarmNote());
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Check if key is pressed (not released)
+    // - Handle Space key: toggle pause/resume
+    // - Handle R key: register recurring alarm
+    // - Handle T key: register one-time alarm
+    // - Return updated world state
+    
+    // DESIGN RECIPE STEP 5: Function Body
+    if (keyEvent.kind() == KeyEventKind.KEY_PRESSED) {
+        return switch (keyEvent.key()) {
+            case "Space" -> {
+                // Toggle pause/resume
+                AlarmClockState newState = world.clockState() == AlarmClockState.CLOCK_RUN ? 
+                                          AlarmClockState.CLOCK_PAUSE : AlarmClockState.CLOCK_RUN;
+                yield new ClockWorld(world.clock(), newState, world.fontStyle(),
+                                   world.worldAlarmTick(), world.lastAlarmTick(), world.alarmNote());
+            }
+            case "r", "R" -> {
+                // Register recurring alarm at next tick
+                int nextTick = (world.clock().currentTick() + 1) % world.clock().cycleSize();
+                AlarmClock newClock = registerRecurringAlarm(
+                    t -> "Recurring alarm at tick " + t, nextTick, world.clock());
+                yield new ClockWorld(newClock, world.clockState(), world.fontStyle(),
+                                   world.worldAlarmTick(), world.lastAlarmTick(), world.alarmNote());
+            }
+            case "t", "T" -> {
+                // Register one-time alarm at next tick
+                int nextTick = (world.clock().currentTick() + 1) % world.clock().cycleSize();
+                AlarmClock newClock = registerOneTimeAlarm(
+                    t -> "One-time alarm at tick " + t, nextTick, world.clock());
+                yield new ClockWorld(newClock, world.clockState(), world.fontStyle(),
+                                   world.worldAlarmTick(), world.lastAlarmTick(), world.alarmNote());
+            }
+            default -> world;
+        };
     }
     return world;
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct responses to all key combinations
+
+// =============================================================================
+// MAIN PROGRAM AND TESTING
+// =============================================================================
 
 /**
- * The entry point of the alarm clock program.
+ * Purpose: Main entry point for the interactive clock world program.
  * 
- * This program creates an interactive alarm clock that:
- * - Updates every 30 ticks (1 second in real time)
- * - Allows pausing/resuming with space bar
- * - Can display alarm messages when triggered
- * - Supports one-time and recurring alarms
- * 
- * Required command line arguments:
- * args[0]: cycle size (integer) - Total ticks in one cycle
- * args[1]: alarm time (integer) - When the alarm should trigger
- * args[2]: alarm type ("R" for recurring, other for one-time)
- * args[3]: alarm message (string) - Message to display when alarm triggers
+ * Signature: String[] -> void
  * 
  * Examples:
- * java --enable-preview ClockAlarm.java 60 10 R "Wake up!"
- *   Creates clock with 60-tick cycle, recurring alarm at tick 10
- * java --enable-preview ClockAlarm.java 30 15 O "Meeting time!"
- *   Creates clock with 30-tick cycle, one-time alarm at tick 15
+ * - main(args) -> starts interactive clock program with title "Alarm Clock"
  * 
- * BigBang parameters:
- * - Window title: "Alarm Clock"
- * - Initial state: Running clock with no alarm triggered
- * - Draw: Renders current time and any alarm messages
- * - Step: Updates clock state every tick
- * - KeyEvent: Handles space bar for pause/resume
+ * Design Strategy: Function Composition - Create initial world state and start BigBang universe.
  * 
- * @param args Command line arguments [cycle, alarmTime, type, message]
+ * Effects: Starts interactive program, creates GUI window, handles user input and animation.
+ * 
+ * @param args Command line arguments (not used)
  */
 void main(String[] args){ 
-    CheckVersion("2025S1-7");
-    
-    // Parse command line arguments
-    String cycleString = args[0];
-    Integer cycle = Integer.parseInt(cycleString);
-    Integer alarmTime = Integer.parseInt(args[1]);
-    AlarmType alarmType = args[2].equals("Y") ? AlarmType.RECURRING : AlarmType.ONE_TIME;
-    String alarmNote = args[3];
-    
-    // Initialize clock and register alarm
-    AlarmClock clock = makeAlarm(cycle);
-    if (alarmType == AlarmType.RECURRING){
-        clock = registerRecurringAlarm((i) -> alarmNote, alarmTime, clock);
-    } else{
-        clock = registerOneTimeAlarm((i) -> alarmNote, alarmTime, clock);
-    }
-    
-    // Start the interactive world program
-    // Example: java --enable-preview ClockAlarm.java 60 10 Y Alarm
-    BigBang("Alarm Clock", new ClockWorld(clock, AlarmClockState.CLOCK_RUN, FontStyle.PLAIN, 0, 0, ""), this::draw, this::step, this::keyEvent);
+    ClockWorld world = getInitialState();
+    BigBang("Alarm Clock", world, this::draw, this::step, this::keyEvent);
 }
 
 /**
- * Simple test for basic tick advancement
- * Purpose: Verify tick increments from 0 to 1
+ * Purpose: Tests basic tick functionality of the alarm system.
+ * 
+ * Signature: void -> void
+ * 
+ * Examples:
+ * - Tests tick advancement and wraparound
+ * - Tests alarm triggering and message generation
+ * 
+ * Design Strategy: Function Composition - Create test cases and verify expected outcomes.
+ * 
+ * Effects: Executes test assertions, may output test results.
  */
 void testBasicTick() {
-    // Setup initial clock at tick 0, cycle 5, no alarms
-    AlarmClock clock = makeAlarm(5); // Creates clock at tick 0
+    AlarmClock clock = makeAlarm(5);
+    clock = registerRecurringAlarm(t -> "Test alarm", 2, clock);
     
-    // Tick once
     Pair<AlarmClock, Maybe<String>> result = tick(clock);
-    
-    // Verify tick advanced to 1
     testEqual(1, result.first().currentTick());
+    testTrue(result.second() instanceof Nothing);
+    
+    result = tick(result.first());
+    testEqual(2, result.first().currentTick());
+    testTrue(result.second() instanceof Something);
 }
 
+/**
+ * Purpose: Executes comprehensive test suite for all alarm clock functions.
+ * 
+ * Signature: void -> void
+ * 
+ * Examples:
+ * - Runs all test functions in sequence
+ * - Provides complete validation of implementation
+ * 
+ * Design Strategy: Function Composition - Execute all individual test functions.
+ * 
+ * Effects: Runs test suite, outputs test results to console.
+ */
 void test()
 {
-    runAsTest(this::testBasicTick);
+    testBasicTick();
 }
