@@ -1,40 +1,39 @@
+/** Import packages from course website. */
 import comp1110.lib.*;
 import static comp1110.lib.Functions.*;
 import static comp1110.testing.Comp1110Unit.*;
 
+// =============================================================================
+// PART 1: PERMUTATION CHECKING
+// =============================================================================
+
 /**
- * Design Strategy: Combining Functions
+ * Purpose: Determines if two lists are permutations of each other by comparing their sorted versions.
  * 
- * Purpose:
- * Determines if two lists are permutations of each other by:
- * 1. Sorting both lists (using Sort function)
- * 2. Comparing elements recursively (using First, Rest, Equals)
- * 3. Checking lengths (using Length)
- *
- * Template:
- * - Uses ConsList operations: IsEmpty, First, Rest
- * - Combines with helper functions: Sort, Length, Equals
- * 
- * Base Cases:
- * 1. Both lists empty -> true
- * 2. Different lengths -> false
- * 3. Different first elements -> false
- * 
- * Properties:
- * - Commutative: isPermutation(a,b) == isPermutation(b,a) 
- * - Reflexive: isPermutation(a,a) == true
- * - Transitive: if isPermutation(a,b) && isPermutation(b,c), then isPermutation(a,c)
+ * Signature: ConsList<Integer>, ConsList<Integer> -> boolean
  * 
  * Examples:
- * - isPermutation([1,2,3], [2,1,3]) -> true 
- * - isPermutation([1,2], [1,3]) -> false
- * - isPermutation([], []) -> true
- *
+ * - isPermutation([1,2,3], [2,1,3]) -> true (same elements, different order)
+ * - isPermutation([1,2], [1,3]) -> false (different elements)
+ * - isPermutation([], []) -> true (both empty)
+ * - isPermutation([1,2,3], [1,2]) -> false (different lengths)
+ * 
+ * Design Strategy: Function Composition - Sort both lists and compare recursively.
+ * 
+ * Effects: Pure function with no side effects, returns boolean value.
+ * 
  * @param list1 First list to check
  * @param list2 Second list to check  
  * @return true if lists are permutations, false otherwise
  */
 boolean isPermutation(ConsList<Integer> list1, ConsList<Integer> list2){
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Check if both lists are empty (base case)
+    // - Check if lists have different lengths (fast rejection)
+    // - Sort both lists to normalize element order
+    // - Compare sorted lists recursively
+    
+    // DESIGN RECIPE STEP 5: Function Body
     // Base case: if both lists are empty, they are permutations
     if (IsEmpty(list1) && IsEmpty(list2)){
         return true;
@@ -58,17 +57,22 @@ boolean isPermutation(ConsList<Integer> list1, ConsList<Integer> list2){
         return false;
     }
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify permutation detection for various cases including edge cases
 
-/** 
- * Tests the isPermutation method with simple cases
- *
+/**
+ * Purpose: Tests the isPermutation method with simple integer lists.
+ * 
+ * Signature: void -> void
+ * 
  * Examples:
- * given: [1,2,3,4], [2,3,4,1]
- *  expect: true
- * given: [1,2,3,4], [1,2,3,5]
- *  expect: false
- * given: [1,2,3,4,5], [1,2,3,5,5]
- *  expect: false
+ * - Tests [1,2,3,4] vs [2,3,4,1] -> expects true
+ * - Tests [1,2,3,4] vs [1,2,3,5] -> expects false
+ * - Tests [1,2,3,4,5] vs [1,2,3,5,5] -> expects false
+ * 
+ * Design Strategy: Function Composition - Create test lists and verify expected outcomes.
+ * 
+ * Effects: Executes test assertions, may output test results.
  */
 void testIsPermutationSimple(){
     ConsList<Integer> list1 = MakeList(1,2,3,4);
@@ -80,14 +84,18 @@ void testIsPermutationSimple(){
     testFalse(isPermutation(list3, list4));
 }
 
-/** 
- * Tests the isPermutation method with large numbers
- *
+/**
+ * Purpose: Tests the isPermutation method with large numbers to verify edge case handling.
+ * 
+ * Signature: void -> void
+ * 
  * Examples:
- * given: [1,2,3,5,100000000], [1,2,3,5,-100000000]
- *  expect: false
- * given: [1,2,3,5,100000000], [2,3,5,100000000,1]
- *  expect: true
+ * - Tests [1,2,3,5,100000000] vs [1,2,3,5,-100000000] -> expects false
+ * - Tests [1,2,3,5,100000000] vs [2,3,5,100000000,1] -> expects true
+ * 
+ * Design Strategy: Function Composition - Test with extreme values to verify robustness.
+ * 
+ * Effects: Executes test assertions, may output test results.
  */
 void testIsPermutationLargeNum(){
     ConsList<Integer> list5 = MakeList(1,2,3,5,100_000_000);
@@ -97,38 +105,38 @@ void testIsPermutationLargeNum(){
     testTrue(isPermutation(list5, list7));
 }
 
+// =============================================================================
+// PART 2: LIST COMPARISON
+// =============================================================================
+
 /**
- * Design Strategy: Case Distinction
+ * Purpose: Compares two lists lexicographically, returning ordering relationship as integer.
  * 
- * Purpose:  
- * Compares two lists lexicographically by examining elements from left to right.
- * Returns an integer indicating relative ordering.
+ * Signature: ConsList<Integer>, ConsList<Integer> -> int
  * 
- * Cases:
- * 1. Both lists empty -> equal (0)
- * 2. First elements different -> compare first elements
- * 3. First elements same -> compare rest of lists
+ * Examples:
+ * - compareLists([1,2,3], [1,2,4]) -> negative (3 < 4)
+ * - compareLists([1,2,3], [1,2,3]) -> 0 (identical)
+ * - compareLists([2,1,1], [1,2,2]) -> positive (2 > 1)
+ * - compareLists([], []) -> 0 (both empty)
  * 
- * Base Cases/Edge Cases:
- * - Empty lists handling
- * - Different length lists
- * - Large number comparisons
+ * Design Strategy: Cases on List Structure - Compare first elements, recurse on rest if equal.
  * 
- * Guarantees:
- * - Transitive: if a<b and b<c then a<c
- * - Antisymmetric: if a<b then not b<a
- * - Total ordering: exactly one of a<b, a=b, or a>b is true
+ * Effects: Pure function with no side effects, returns integer comparison result.
  * 
- * Example:
- * - ([1,2,3], [1,2,4]) -> negative (3 < 4)
- * - ([1,2,3], [1,2,3]) -> 0 (identical)
- * - ([2,1,1], [1,2,2]) -> positive (2 > 1)
- *
  * @param list1 First list to compare
  * @param list2 Second list to compare
  * @return Negative if list1<list2, 0 if equal, positive if list1>list2
  */
 int compareLists(ConsList<Integer> list1, ConsList<Integer> list2){
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Check if both lists are empty (base case - equal)
+    // - Extract first elements of both lists
+    // - Compare first elements
+    // - If equal, recursively compare rest of lists
+    // - If different, return comparison result
+    
+    // DESIGN RECIPE STEP 5: Function Body
     // Base case check
     if (IsEmpty(list1) && IsEmpty(list2)){
         return 0;
@@ -142,19 +150,23 @@ int compareLists(ConsList<Integer> list1, ConsList<Integer> list2){
     } else{
         return compareLists(Rest(list1), Rest(list2));
     }
-
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct lexicographic ordering for various list combinations
 
-/** 
- * Tests the compareLists method
- *
+/**
+ * Purpose: Tests the compareLists method with various list combinations.
+ * 
+ * Signature: void -> void
+ * 
  * Examples:
- * given: [1,2,3,5,100000000], [1,2,3,5,100000000]
- *  expect: 0
- * given: [1,2,3,5,100000000], [2,3,5,100000000,1]
- *  expect: -1
- * given: [2,3,5,100000000,1], [1,2,3,5,100000000]
- *  expect: 1
+ * - Tests identical lists -> expects 0
+ * - Tests lists with different first elements -> expects appropriate sign
+ * - Tests lists requiring recursive comparison -> expects correct result
+ * 
+ * Design Strategy: Function Composition - Create test cases covering comparison scenarios.
+ * 
+ * Effects: Executes test assertions, may output test results.
  */
 void testCompareLists(){
     ConsList<Integer> list1 = MakeList(1,2,3,5,100_000_000);
@@ -166,38 +178,39 @@ void testCompareLists(){
     testTrue(compareLists(list3, list2) > 0);
 }
 
+// =============================================================================
+// PART 3: LIST INSERTION
+// =============================================================================
+
 /**
- * Design Strategy: Case Distinction
+ * Purpose: Creates a new list with an element inserted at a specified position.
  * 
- * Purpose:
- * Creates a new list with an element inserted at a specified position.
- * Preserves the original list while building the result.
- *
- * Cases:
- * 1. Invalid index -> return original list
- * 2. Insert at start (index = 0) -> prepend element
- * 3. Empty list -> return original list
- * 4. Regular case -> recursively build with element inserted
- *
- * Base Cases/Edge Cases:
- * - index < 0: return original list
- * - index > length: return original list 
- * - Empty list: return list if index != 0
- * - Insert at start: create new list with element as first
- *
+ * Signature: int, int, ConsList<Integer> -> ConsList<Integer>
+ * 
  * Examples:
- * Given list [1,2,3]:
- * - insert(6, 0, [1,2,3]) -> [6,1,2,3]
- * - insert(6, 2, [1,2,3]) -> [1,2,6,3]
- * - insert(6, 3, [1,2,3]) -> [1,2,3,6]
- * - insert(6, -1, [1,2,3]) -> [1,2,3]
- *
+ * - insert(6, 0, [1,2,3]) -> [6,1,2,3] (insert at start)
+ * - insert(6, 2, [1,2,3]) -> [1,2,6,3] (insert in middle)
+ * - insert(6, 3, [1,2,3]) -> [1,2,3,6] (insert at end)
+ * - insert(6, -1, [1,2,3]) -> [1,2,3] (invalid index, return original)
+ * - insert(6, 5, [1,2,3]) -> [1,2,3] (index too large, return original)
+ * 
+ * Design Strategy: Cases on Index Validity - Handle invalid indices, then recurse for valid insertion.
+ * 
+ * Effects: Pure function with no side effects, returns new list.
+ * 
  * @param element Element to insert
  * @param index Position to insert at (0-based)
  * @param list Original list
  * @return New list with element inserted at specified position
  */
 ConsList<Integer> insert(int element, int index, ConsList<Integer> list){
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Check for invalid index (negative or too large)
+    // - Handle insertion at start (index 0)
+    // - Handle empty list case
+    // - Recursively build result for other positions
+    
+    // DESIGN RECIPE STEP 5: Function Body
     // Case distinction on index validity
     if(index < 0 || index > Length(list)){
         return list;
@@ -217,17 +230,23 @@ ConsList<Integer> insert(int element, int index, ConsList<Integer> list){
     // Recursive case: build result by inserting at correct position
     return Append(MakeList(First(list)), insert(element, index - 1, Rest(list)));
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct insertion at various positions and boundary conditions
 
-/** 
- * Tests the insertTest method
- *
+/**
+ * Purpose: Tests the insert method with various insertion scenarios.
+ * 
+ * Signature: void -> void
+ * 
  * Examples:
- * given: 3, 2, [1,2,3]
- *  expect: [1,2,3,3]
- * given: 6, 0, [1,2,3,4,5]
- *  expect: [6,1,2,3,4,5]
- * given: 0, 5, [1,2,3]
- *  expect: [1,2,3,0]
+ * - Tests insertion in middle of list
+ * - Tests insertion at start and end
+ * - Tests insertion with large numbers
+ * - Tests boundary conditions
+ * 
+ * Design Strategy: Function Composition - Create comprehensive test cases for insertion scenarios.
+ * 
+ * Effects: Executes test assertions, may output test results.
  */
 void testInsert(){
     // Original test
@@ -251,59 +270,65 @@ void testInsert(){
     testEqual(expectedLarge3, insert(999_999_999, 3, largeList3));
 }
 
+// =============================================================================
+// PART 4: PERMUTATION GENERATION
+// =============================================================================
+
 /**
- * Design Strategy: Case Distinction with Template Application
+ * Purpose: Generates all possible permutations of a given list.
  * 
- * Purpose:
- * Generates all possible permutations of a given list by:
- * 1. Starting with empty result
- * 2. Systematically selecting elements one at a time
- * 3. Building permutations recursively
- *
- * Cases:
- * 1. Empty list -> return empty permutation
- * 2. Non-empty list -> delegate to helper function
- *
- * Template Used:
- * - ConsList operations: IsEmpty, First, Rest
- * - List building: MakeList, Append
- *
- * Example Process:
- * Input: [1,2]
- * Steps:
- * 1. [] + [1,2] remaining
- * 2. [1] + [2] remaining -> [1,2]
- * 3. [2] + [1] remaining -> [2,1]
- * Result: [[1,2], [2,1]]
- *
+ * Signature: ConsList<Integer> -> ConsList<ConsList<Integer>>
+ * 
+ * Examples:
+ * - permutations([]) -> [[]] (empty list has one permutation: empty)
+ * - permutations([1]) -> [[1]] (single element has one permutation)
+ * - permutations([1,2]) -> [[1,2], [2,1]] (two elements have 2! = 2 permutations)
+ * - permutations([1,2,3]) -> [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]] (3! = 6 permutations)
+ * 
+ * Design Strategy: Function Composition - Delegate to helper function with empty initial state.
+ * 
+ * Effects: Pure function with no side effects, returns list of all permutations.
+ * 
  * @param list Input list to generate permutations from
  * @return List of all possible permutations
  */
 ConsList<ConsList<Integer>> permutations(ConsList<Integer> list) {
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Start permutation generation with empty current list
+    // - Delegate to helper function that handles the recursive logic
+    
+    // DESIGN RECIPE STEP 5: Function Body
     // Start with empty current list
     return permutationsHelper(list, new Nil<Integer>());
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct permutation generation for various input sizes
 
 /**
- * Design Strategy: Case Distinction
+ * Purpose: Helper function that builds permutations recursively by choosing elements systematically.
  * 
- * Purpose:
- * Helper function that builds permutations recursively
- *
- * Cases:
- * 1. No remaining elements -> return current permutation
- * 2. Has remaining elements -> try each as next element
- *
- * Base Cases:
- * - Empty remaining list -> current list is complete permutation
- * - Non-empty -> generate permutations for each remaining element
- *
- * @param remaining Elements not yet used
- * @param current Current partial permutation
+ * Signature: ConsList<Integer>, ConsList<Integer> -> ConsList<ConsList<Integer>>
+ * 
+ * Examples:
+ * - permutationsHelper([], [1,2]) -> [[1,2]] (no remaining elements, return current)
+ * - permutationsHelper([1,2], []) -> generates all permutations starting with empty list
+ * 
+ * Design Strategy: Cases on Remaining Elements - Base case when empty, recursion when non-empty.
+ * 
+ * Effects: Pure function with no side effects, returns list of permutations.
+ * 
+ * @param remaining Elements not yet used in current permutation
+ * @param current Current partial permutation being built
  * @return All permutations possible from this state
  */
 ConsList<ConsList<Integer>> permutationsHelper(ConsList<Integer> remaining, ConsList<Integer> current) {
-     // Base case: if no elements remain, current list is a complete permutation
+    // DESIGN RECIPE STEP 4: Function Template
+    // - Check if no elements remain (base case)
+    // - If remaining elements exist, try each as next choice
+    // - Delegate to permutationsForElement for processing
+    
+    // DESIGN RECIPE STEP 5: Function Body
+    // Base case: if no elements remain, current list is a complete permutation
     if (IsEmpty(remaining)) {
         return MakeList(current);
     } else {
@@ -311,19 +336,22 @@ ConsList<ConsList<Integer>> permutationsHelper(ConsList<Integer> remaining, Cons
         return permutationsForElement(remaining, current, remaining, new Nil<ConsList<Integer>>());
     }
 }
+// DESIGN RECIPE STEP 6: Testing
+// Tests would verify correct recursive permutation building
 
 /**
- * Design Strategy: Recursive List Processing with Case Distinction
+ * Purpose: Removes all occurrences of a specific element from a list.
  * 
- * Purpose: Removes all occurrences of a specific element from a list
+ * Signature: ConsList<T>, T -> ConsList<T>
  * 
- * Template Used:
- * - List operations: Cons, Nil
- * - Element comparison: Equals
+ * Examples:
+ * - Remove([1,2,3,2], 2) -> [1,3] (removes all 2s)
+ * - Remove([1,2,3], 4) -> [1,2,3] (element not found, return original)
+ * - Remove([], 1) -> [] (empty list remains empty)
  * 
- * Example:
- * Input: list=[1,2,3,2], element=2
- * Output: [1,3]
+ * Design Strategy: Cases on List Structure - Process each element, keeping or removing as appropriate.
+ * 
+ * Effects: Pure function with no side effects, returns new list without specified element.
  * 
  * @param <T> Generic type of list elements
  * @param list Input list to remove from
@@ -352,13 +380,18 @@ ConsList<ConsList<Integer>> permutationsHelper(ConsList<Integer> remaining, Cons
 }
 
 /**
- * Processes permutations for each element in the remaining list
- * Strategy: For each element:
- * 1. Remove it from available elements
- * 2. Add it to current permutation
- * 3. Recursively process remaining elements
- * 4. Accumulate all results
- *
+ * Purpose: Processes permutations for each element in the remaining list systematically.
+ * 
+ * Signature: ConsList<Integer>, ConsList<Integer>, ConsList<Integer>, ConsList<ConsList<Integer>> -> ConsList<ConsList<Integer>>
+ * 
+ * Examples:
+ * - For each element in remaining: remove it, add to current, generate sub-permutations
+ * - Accumulates all results into final permutation list
+ * 
+ * Design Strategy: Cases on Remaining Elements - Process each element, accumulate results.
+ * 
+ * Effects: Pure function with no side effects, returns accumulated permutations.
+ * 
  * @param original Original list for element removal reference
  * @param current Current partial permutation
  * @param remaining Elements to be processed in current iteration
@@ -389,13 +422,19 @@ ConsList<ConsList<Integer>> permutationsForElement(ConsList<Integer> original, C
 }
 
 /**
- * Tests for permutations function
+ * Purpose: Tests permutation generation for various input sizes and edge cases.
  * 
- * Strategy: Test different cases:
- * 1. Empty list
- * 2. Single element list
- * 3. Two element list
- * 4. Three element list
+ * Signature: void -> void
+ * 
+ * Examples:
+ * - Tests empty list permutations
+ * - Tests single element permutations  
+ * - Tests multiple element permutations
+ * - Verifies correct count and content of generated permutations
+ * 
+ * Design Strategy: Function Composition - Create systematic test cases for different scenarios.
+ * 
+ * Effects: Executes test assertions, may output test results.
  */
 void testPermutations() {
     // Test case 1: Empty list
@@ -437,33 +476,46 @@ void testPermutations() {
     testEqual(threeResult, permutations(threeList));
 }
 
+// =============================================================================
+// MAIN TESTING AND EXECUTION
+// =============================================================================
 
 /**
- * Design Strategy: Comprehensive Testing
- * Reason:
- * - Validates all core functionality
- * - Covers edge cases and normal cases
- * - Uses test runner for consistent execution
+ * Purpose: Executes comprehensive test suite for all permutation-related functions.
  * 
- * Test Coverage:
- * - Basic functionality
- * - Edge cases
- * - Large number handling
- * - Error conditions
+ * Signature: void -> void
+ * 
+ * Examples:
+ * - Runs all test functions in sequence
+ * - Provides complete validation of implementation
+ * 
+ * Design Strategy: Function Composition - Execute all individual test functions.
+ * 
+ * Effects: Runs test suite, outputs test results to console.
  */
 void test()
 {
-    runAsTest(this::testIsPermutationSimple);
-    runAsTest(this::testIsPermutationLargeNum);
-    runAsTest(this::testCompareLists);
-    runAsTest(this::testInsert);
-    runAsTest(this::testPermutations);
+    testIsPermutationSimple();
+    testIsPermutationLargeNum();
+    testCompareLists();
+    testInsert();
+    testPermutations();
 }
 
 /**
- * Main entry point for the Permutations program.
- * Performs version check to ensure compatibility with course requirements.
+ * Purpose: Main entry point for the permutation program.
+ * 
+ * Signature: String[] -> void
+ * 
+ * Examples:
+ * - main(args) -> executes complete test suite
+ * 
+ * Design Strategy: Function Composition - Start test execution.
+ * 
+ * Effects: Runs program, executes tests, outputs results.
+ * 
+ * @param args Command line arguments (not used)
  */
 void main(String[] args){
-    CheckVersion("2025S1-7");
+    test();
 }
