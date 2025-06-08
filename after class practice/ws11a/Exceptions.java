@@ -1,4 +1,4 @@
-package ws11b;
+package ws11a;
 
 import java.io.IOException;
 
