@@ -5,26 +5,7 @@ import java.util.Iterator;      // Iterator interface
 import java.util.ListIterator;  // ListIterator interface
 import java.util.NoSuchElementException;
 
-/** A generic doubly-linked list implementation parameterized
- *  by the type of elements E. It leverages a sequence of doubly-linked
- *  Node<E> objects, each of which holds a reference to the previous
- *  and next node in the list. The next node of the last node points to
- *  the first node, and the previous node of the first node points to the
- *  last node. The list can have repeated elements, the elements can also be
- *  null. It implements the methods of the parameterized List<E> interface
- *  in the Java collections framework.
- *  Examples: DoublyLinkedList<Integer>([])
- *            DoublyLinkedList<Integer>([-1, 10 ,2])
- *            DoublyLinkedList<String>(["hello", "world" , "!"])
- *  @param first A reference to the first node in the list or null
- *               if the list is empty.
- *  @implSpec Invariants:
- *            1. first always points to the first node of the list, or
- *               to null if the list is empty.
- *            2. The list is always kept in a consistent state, i.e.,
- *               each node in the list points to the correct
- *               previous and next nodes in the sequence
- */
+
 public class DoublyLinkedList<E> implements List<E> {
     Node<E> first;
 
@@ -51,21 +32,7 @@ public class DoublyLinkedList<E> implements List<E> {
             this.next = next;
         }
     }
-    /* .. CODE TEMPLATE goes here .. */
 
-    /*
-     * A class implementing the Iterator<E> interface in the
-     * Java collections framework. The objects of this class
-     * allow one walk through the elements in the list. The class
-     * is private as users of the DoublyLinkedList<E> do not actually
-     * need to directly work with instances of DoublyLinkedListIterator<E> but
-     * directly with a reference variable of type Iterator<E>
-     * @param list The list the iterator walks through
-     * @param current A reference to the next element that will be returned
-     *                on a call to the next() method
-     * @param visitedFirst Whether the iterator has already visited the
-     *                     first element or not
-     */
     private static class DoublyLinkedListIterator<E> implements Iterator<E> {
         DoublyLinkedList<E> list;
         Node<E> next;
@@ -77,9 +44,7 @@ public class DoublyLinkedList<E> implements List<E> {
             visitedFirst = false;
         }
 
-        /**
-         ... application of design recipe goes here ...
-         */
+
         @Override
         public boolean hasNext() {
             if (this.list.isEmpty()) {
@@ -93,9 +58,7 @@ public class DoublyLinkedList<E> implements List<E> {
             }
         }
 
-        /**
-         * ... application of design recipe goes here ...
-         */
+
         @Override
         public E next() {
             if (!hasNext()) throw new NoSuchElementException();
@@ -113,9 +76,6 @@ public class DoublyLinkedList<E> implements List<E> {
     }
 
     @Override
-    /**
-     * ... application of design recipe goes here ...
-     */
     public boolean isEmpty() {
         return first==null;
     }
@@ -126,9 +86,6 @@ public class DoublyLinkedList<E> implements List<E> {
     }
 
     @Override
-    /**
-     * ... application of design recipe goes here ...
-     */
     public Iterator<E> iterator() {
         return new DoublyLinkedListIterator<E>(this);
     }
@@ -144,9 +101,6 @@ public class DoublyLinkedList<E> implements List<E> {
     }
 
     @Override
-    /**
-     * ... application of design recipe ...
-     */
     public boolean add(E e) {
         if (isEmpty())
         {
