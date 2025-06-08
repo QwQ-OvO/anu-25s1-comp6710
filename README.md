@@ -14,7 +14,9 @@ Experienced programmers can apply for credit transfer via [CSS Course credit & e
 
 Doing so early may spare you a **extremely painful** first semester.
 
-### 3. About Functional Java
+---
+
+### About Functional Java
 
 Up until the mid-semester break the teaching is entirely in Functional Java, and Assignments 1 & 2 must be written with it. We will drill recursion heavily and, right at the end, touch on binary trees. 
 
@@ -24,7 +26,7 @@ After the mid-semester the course switches back to regular Java and we will neve
 
 How to juggle writing assignments in “Fava” while privately practising regular Java is something we will have to work out.
 
-### 4. About Code Walk
+### About Code Walk
 
 This semester, having code that compiles and passes the interface tests is essential for both the mid-semester and final exams, but it is not the main criterion for the weekly assignments. 
 
@@ -34,6 +36,6 @@ This semester, having code that compiles and passes the interface tests is essen
 
 - Treat the code-walk presentation with great seriousness—it will strongly influence your assignment mark.
 
-### 5. The Marking Scheme
+### About Marking Scheme
 
 This semester the graders will only assess the distinction section of any assignment or exam after the non-distinction section has reached 90 % correctness, and the distinction part is not bonus credit. Be mentally prepared for very low continuous marks. Of course, it would be wonderful if the scheme is revised in the new semester.
