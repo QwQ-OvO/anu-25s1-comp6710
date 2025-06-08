@@ -8,8 +8,6 @@ import static comp1110.universe.Image.*;
 import static comp1110.universe.Universe.*;
 
 /**
- * DESIGN RECIPE STEP 1: Data Definition for World
- * 
  * Purpose: Represents the complete state of the crawler-transporter world at any given moment.
  * 
  * Signature: Record containing int width, int height, int crawler_X, int rocket_X, int rocket_Y, RocketState rocket_State.
@@ -60,8 +58,6 @@ int ROCKET_X = 40;
 int ROCKET_Y = 420; 
 
 /**
- * DESIGN RECIPE STEP 1: Data Definition for RocketState
- * 
  * Purpose: Represents the different states a rocket can be in during the simulation.
  * 
  * Signature: Enumeration with three values: NOT_LOADED, HAS_LOADED, HAS_LAUNCHED.
@@ -82,8 +78,6 @@ enum RocketState {
 }
 
 /**
- * DESIGN RECIPE STEP 2: Function Signature and Purpose Statement
- * 
  * Purpose: Renders the complete world scene including background, crawler, and rocket based on current world state.
  * 
  * Signature: World -> Image
@@ -133,6 +127,56 @@ Image draw(World world) {
 // Tests would verify correct rendering for each rocket state
 
 /**
+ * Purpose: Returns the rocket's horizontal center X position if rocket exists, Nothing otherwise.
+ *
+ * Signature: World -> Maybe<Integer>
+ *
+ * Examples:
+ * - getRocketX(world with NOT_LOADED) -> Nothing
+ * - getRocketX(world with HAS_LOADED at X=200) -> Something(200)
+ * - getRocketX(world with HAS_LAUNCHED at X=300) -> Something(300)
+ *
+ * Design Strategy: Cases on RocketState - Return position only when rocket exists.
+ *
+ * Effects: Pure function with no side effects, returns Maybe<Integer> object.
+ *
+ * @param world The current world state
+ * @return Maybe containing rocket's X position, or Nothing if no rocket
+ */
+Maybe<Integer> getRocketX(World world){
+    return switch (world.rocket_State()) {
+        case NOT_LOADED -> new Nothing<Integer>(); //No position available when rocket is not loaded
+        case HAS_LOADED -> new Something<Integer>(world.rocket_X());
+        case HAS_LAUNCHED -> new Something<Integer>(world.rocket_X());
+    };
+}
+
+/**
+ * Purpose: Returns the rocket's vertical center Y position if rocket is launched, Nothing otherwise.
+ *
+ * Signature: World -> Maybe<Integer>
+ *
+ * Examples:
+ * - getRocketY(world with NOT_LOADED) -> Nothing
+ * - getRocketY(world with HAS_LOADED) -> Nothing (rocket position not relevant when loaded)
+ * - getRocketY(world with HAS_LAUNCHED at Y=300) -> Something(300)
+ *
+ * Design Strategy: Cases on RocketState - Return Y position only when rocket is launched.
+ *
+ * Effects: Pure function with no side effects, returns Maybe<Integer> object.
+ *
+ * @param world The current world state
+ * @return Maybe containing rocket's Y position when launched, or Nothing otherwise
+ */
+Maybe<Integer> getRocketY(World world){
+    return switch (world.rocket_State()) {
+        case NOT_LOADED -> new Nothing<Integer>();
+        case HAS_LOADED -> new Nothing<Integer>();
+        case HAS_LAUNCHED -> new Something<Integer>(world.rocket_Y());
+    };
+}
+
+/**
  * Purpose: Creates and returns the initial state of the world when the program starts.
  * 
  * Signature: void -> World
@@ -151,8 +195,6 @@ World getInitialState(){
 }
 
 /**
- * DESIGN RECIPE STEP 2: Function Signature and Purpose Statement
- * 
  * Purpose: Updates the world state each animation frame, handling rocket movement and state transitions.
  * 
  * Signature: World -> World
@@ -290,56 +332,6 @@ World keyEvent(World world, KeyEvent event) {
  */
 int getCrawlerX(World world) {
     return world.crawler_X();
-}
-
-/**
- * Purpose: Returns the rocket's horizontal center X position if rocket exists, Nothing otherwise.
- * 
- * Signature: World -> Maybe<Integer>
- * 
- * Examples:
- * - getRocketX(world with NOT_LOADED) -> Nothing
- * - getRocketX(world with HAS_LOADED at X=200) -> Something(200)
- * - getRocketX(world with HAS_LAUNCHED at X=300) -> Something(300)
- * 
- * Design Strategy: Cases on RocketState - Return position only when rocket exists.
- * 
- * Effects: Pure function with no side effects, returns Maybe<Integer> object.
- * 
- * @param world The current world state
- * @return Maybe containing rocket's X position, or Nothing if no rocket
- */
-Maybe<Integer> getRocketX(World world){
-    return switch (world.rocket_State()) {
-        case NOT_LOADED -> new Nothing<Integer>(); //No position available when rocket is not loaded
-        case HAS_LOADED -> new Something<Integer>(world.rocket_X()); 
-        case HAS_LAUNCHED -> new Something<Integer>(world.rocket_X()); 
-    };
-}
-
-/**
- * Purpose: Returns the rocket's vertical center Y position if rocket is launched, Nothing otherwise.
- * 
- * Signature: World -> Maybe<Integer>
- * 
- * Examples:
- * - getRocketY(world with NOT_LOADED) -> Nothing
- * - getRocketY(world with HAS_LOADED) -> Nothing (rocket position not relevant when loaded)
- * - getRocketY(world with HAS_LAUNCHED at Y=300) -> Something(300)
- * 
- * Design Strategy: Cases on RocketState - Return Y position only when rocket is launched.
- * 
- * Effects: Pure function with no side effects, returns Maybe<Integer> object.
- * 
- * @param world The current world state
- * @return Maybe containing rocket's Y position when launched, or Nothing otherwise
- */
-Maybe<Integer> getRocketY(World world){
-    return switch (world.rocket_State()) {
-        case NOT_LOADED -> new Nothing<Integer>(); 
-        case HAS_LOADED -> new Nothing<Integer>(); 
-        case HAS_LAUNCHED -> new Something<Integer>(world.rocket_Y());
-    };
 }
 
 /**

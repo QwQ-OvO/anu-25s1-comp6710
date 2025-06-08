@@ -5,8 +5,6 @@ import static comp1110.lib.Functions.*;
 import static comp1110.testing.Comp1110Unit.*;
 
 /**
- * DESIGN RECIPE STEP 1: Data Definition for Role
- * 
  * Purpose: Represents the different roles a user can have in the university system.
  * 
  * Signature: Enumeration with three values: STUDENT, ACADEMIC, PROFESSIONAL_STAFF.
@@ -116,8 +114,6 @@ Users makeProfessionalStaff(String name, Date dateOfBirth) {
 // =============================================================================
 
 /**
- * DESIGN RECIPE STEP 2: Function Signature and Purpose Statement
- * 
  * Purpose: Returns the next date from today (excluding today) on which the given user can celebrate their birthday.
  * 
  * Signature: Users, Date -> Date
@@ -167,8 +163,6 @@ Date nextBirthday(Users users, Date today) {
 // =============================================================================
 
 /**
- * DESIGN RECIPE STEP 2: Function Signature and Purpose Statement
- * 
  * Purpose: Returns the current number of full years that have elapsed since the given user was born up to today.
  * 
  * Signature: Users, Date -> long
@@ -217,8 +211,6 @@ long currentAge(Users users, Date today) {
 // =============================================================================
 
 /**
- * DESIGN RECIPE STEP 2: Function Signature and Purpose Statement
- * 
  * Purpose: Returns the next date from today (excluding today) at which the given user will get a salary increase,
  *          or Nothing if they will not get one. Rule: Academics get salary increases on birthdays in odd years,
  *          Professional staff get increases on birthdays in even years, Students don't get salary increases.
@@ -288,8 +280,6 @@ Maybe<Date> nextSalaryIncrease(Users users, Date today) {
 // =============================================================================
 
 /**
- * DESIGN RECIPE STEP 2: Function Signature and Purpose Statement
- * 
  * Purpose: Provides information about the given user, including name, role (spelled out),
  *          age in full years, next birthday in d/m/yyyy format, and next salary increase date in d/m/yyyy format.
  * 
@@ -357,8 +347,6 @@ String toInfo(Users users, Date today) {
 // =============================================================================
 
 /**
- * DESIGN RECIPE STEP 2: Function Signature and Purpose Statement
- * 
  * Purpose: Main function that provides an interactive interface for calculating user information.
  *          Prompts user for name, role, and birth date, then displays calculated information.
  * 
