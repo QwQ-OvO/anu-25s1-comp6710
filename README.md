@@ -1,4 +1,4 @@
-# COMP6710 — 25S1 Notes 
+# COMP6710 — 25S1 作业及ND部分期末试题 
 
 The following comments reflect my personal experience in 25S1
 
