@@ -1,4 +1,4 @@
-package PASS.Q4EventSystem;
+package PASS.Q4EventSystem_Practice;
 
 /**
  * Represents an event to be handled by an event handler function.

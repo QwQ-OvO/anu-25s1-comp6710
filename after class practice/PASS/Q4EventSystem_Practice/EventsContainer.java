@@ -1,4 +1,4 @@
-package PASS.Q4EventSystem;
+package PASS.Q4EventSystem_Practice;
 /*******************************
  * SSSS TTTTT 000 PPPP ! *
  * S     T   0 0 P   P ! *
@@ -22,13 +22,12 @@ import java.util.List;
  * The container itself does not handle events; it relies on an EventHandler
  * to dispatch the events in the container to event handlers corresponding
  * to the right event kind.
- *
+ * <p>
  * You MUST NOT change the signatures of the existing methods in the class.
  * You MUST implement the class methods below.
  */
 public class EventsContainer {
-    // Member variable to store events in the order they were added
-    private List<Event> events = new LinkedList<>();
+    LinkedList<Event> orderedEvents = new LinkedList<>();
 
     /**
      * Adds a new Event at the tail of the container.
@@ -36,7 +35,7 @@ public class EventsContainer {
      * @param event The event to be added to the container
      */
     public void addEvent(Event event) {
-        events.add(event);
+        orderedEvents.add(event);
     }
 
     /**
@@ -44,13 +43,14 @@ public class EventsContainer {
      * If the container is empty, it returns null.
      *
      * @return event The event at the head of the container, or null
-     *               if the container is empty
+     * if the container is empty
      */
     public Event extractEvent() {
-        if (events.isEmpty()) {
+        if (orderedEvents == null || orderedEvents.isEmpty()) {
             return null;
+        } else {
+            return orderedEvents.removeFirst();
         }
-        return events.remove(0);
     }
 
     /**
@@ -65,21 +65,19 @@ public class EventsContainer {
      *
      * @param eventHandler An event handler
      * @return A list with the events that were handled (and thus extracted
-     *         from the container). If no events were handled, returns an empty
-     *         list.
+     * from the container). If no events were handled, returns an empty
+     * list.
      */
     public List<Event> handleEvents(EventHandler eventHandler) {
-        List<Event> handledEvents = new ArrayList<>();
-        Iterator<Event> iterator = events.iterator();
-        
-        while (iterator.hasNext()) {
-            Event event = iterator.next();
-            if (eventHandler.handleEvent(event)) {
-                handledEvents.add(event);
-                iterator.remove();
+        List<Event> removedEvents = new ArrayList<>();
+        Iterator<Event> findEvents = orderedEvents.iterator();
+        while (findEvents.hasNext()) {
+            Event e = findEvents.next();
+            if (eventHandler.handleEvent(e)) {
+                removedEvents.add(e);
+                findEvents.remove();
             }
         }
-        
-        return handledEvents;
+        return removedEvents;
     }
 } 

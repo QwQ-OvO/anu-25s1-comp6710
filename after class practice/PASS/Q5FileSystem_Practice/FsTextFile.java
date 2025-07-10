@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class FsTextFile implements FsNode {
 
-    private final File file;
+    //private final File file;
     // 提示：需要存储文件引用和文件内容（行列表）
     
     /**
@@ -17,13 +17,14 @@ public class FsTextFile implements FsNode {
      * @param file an abstract pathname pointing to a text file
      */
     public FsTextFile(File file, File file1) {
-        this.file = file;
+        //this.file = file;
         // 提示：使用BufferedReader读取文件所有行
     }
     
     @Override
     public File getUnderlyingFile() {
-        return file;
+        //return file;
+        return null;
     }
     
     @Override

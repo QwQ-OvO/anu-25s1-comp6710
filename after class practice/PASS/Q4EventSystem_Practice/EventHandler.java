@@ -1,4 +1,4 @@
-package PASS.Q4EventSystem;
+package PASS.Q4EventSystem_Practice;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +30,7 @@ import java.util.function.Function;
  * You MUST implement the class methods below.
  */
 public class EventHandler {
-    // Member variable to store the mapping from event kinds to handler functions
-    private Map<String, Consumer<Event>> handlers = new HashMap<>();
+    HashMap<String, Consumer<Event>> eventHandleFunction = new HashMap<>();
 
     /**
      * Associates an event kind to an event handler function. If the
@@ -39,12 +38,12 @@ public class EventHandler {
      * the existing event handler function is replaced by the
      * one provided in this method.
      *
-     * @param eventKind The kind of the event for which we want
-     *                  to register an event handler function
+     * @param eventKind       The kind of the event for which we want
+     *                        to register an event handler function
      * @param handlerFunction The function that handles events of this kind
      */
     public void registerEventHandlerFunction(String eventKind, Consumer<Event> handlerFunction) {
-        handlers.put(eventKind, handlerFunction); // put建立映射关系
+        eventHandleFunction.put(eventKind, handlerFunction);
     }
 
     /**
@@ -56,11 +55,11 @@ public class EventHandler {
      * @param eventKind The kind of the event for which we want
      *                  to unregister an event handler function
      * @return The event handler function that was in charge of handling
-     *         the event kind, or null if there was no event handler function
-     *         associated to the event kind.
+     * the event kind, or null if there was no event handler function
+     * associated to the event kind.
      */
     public Consumer<Event> unregisterEventHandlerFunction(String eventKind) {
-        return handlers.remove(eventKind);
+        return eventHandleFunction.remove(eventKind);
     }
 
     /**
@@ -72,12 +71,12 @@ public class EventHandler {
      *
      * @param event The event for which we want to trigger an event handler function.
      * @return true if there is an event handler function currently associated to the event, and
-     *         false otherwise
+     * false otherwise
      */
     public boolean handleEvent(Event event) {
-        Consumer<Event> handler = handlers.get(event.kind());
-        if (handler != null) {
-            handler.accept(event);
+        Consumer<Event> eventDispatch = eventHandleFunction.get(event.kind());
+        if (! (eventDispatch == null)) {
+            eventDispatch.accept(event);
             return true;
         }
         return false;
